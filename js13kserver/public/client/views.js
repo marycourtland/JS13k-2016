@@ -1,0 +1,72 @@
+window.g = window.g || {};
+
+// This can be optimized a lot.
+
+g.views = {};
+
+// INTRO
+
+g.views.showIntro = function() {
+    $('game').hide();
+    $('input-name').hide();
+    $('input-code').hide();
+    $('start').hide();
+    $('intro').show();
+}
+
+g.views.showNewGame = function() {
+    $('game-new').hide();
+    $('game-join').hide();
+    $('input-name').show();
+    $('start').show();
+}
+
+g.views.showJoinGame = function() {
+    $('game-new').hide();
+    $('game-join').hide();
+    $('input-name').show();
+    $('input-code').show();
+    $('start').show();
+}
+
+// GAMEPLAY
+
+g.views.showGame = function() {
+    $('intro').hide();
+    $('game').show();
+}
+
+g.views.renderGame = function() {
+    $('players').text("team: " + _.mapProp(g.game.players, 'name').join(', '));
+    $('code').text("game code: " + g.game.code);
+
+    // Render mines
+    for (var i = 0; i < g.game.mines.length; i++) {
+        var $mine = $(document.createElement('span'));
+        $mine.className = 'mine';
+        $mine.id = 'mine-' + i;
+        $('gameplay').appendChild($mine); 
+        g.views.updateMine(i);
+    }
+
+    // Render player
+    g.views.updatePlayer()
+}
+
+g.views.updatePlayer = function() {
+    $('player').show().css({
+        left: g.me.coords.x + 'px',
+        top: g.me.coords.y + 'px'
+    })
+}
+
+g.views.updateMine = function(index, size) {
+    var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
+    // TODO: this is getting calculated twice - don't do that
+    size = size || word.size;
+    $mine.text(word.text).css({
+        'font-size': size + 'px',
+        'left': mine.coords.x + 'px',
+        'top': mine.coords.y + 'px',
+    })
+}
