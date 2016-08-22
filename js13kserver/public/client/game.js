@@ -4,9 +4,7 @@ Game.prototype.updateMines = function(player) {
         var mine = this.mines[i];
         var d = distance(player.coords, mine.coords);
         if (d < mine.getWord().distance) {
-            console.log('Mine levelled up:', mine.getWord().text)
-            mine.levelUp();
-            g.views.updateMine(i);
+            g.actions['mine-level-up'](i);
         }
         else {
             // render the mine text at a different size

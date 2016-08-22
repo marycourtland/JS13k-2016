@@ -6,9 +6,7 @@ Game.prototype.addPlayer = function(name, socket) {
 
     this.players.push(newbie);
 
-    var gameData = this.serialize();
     this.emit('player_joined', {
-        game: gameData,
         name: newbie.name
     })
 
@@ -43,10 +41,10 @@ Game.prototype.addMine = function(mine) {
 }
 
 // TODO: change this to a single socket room
-Game.prototype.emit = function() {
-    var args = arguments;
+Game.prototype.emit = function(signal, data) {
+    if (!data.game) data.game = this.serialize();
     this.players.forEach(function(player) {
-        player.socket.emit.apply(player.socket, args)
+        player.socket.emit(signal, data);
     })
 }
 

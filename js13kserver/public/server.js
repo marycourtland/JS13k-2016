@@ -7,9 +7,7 @@ Game.prototype.addPlayer = function(name, socket) {
 
     this.players.push(newbie);
 
-    var gameData = this.serialize();
     this.emit('player_joined', {
-        game: gameData,
         name: newbie.name
     })
 
@@ -44,10 +42,10 @@ Game.prototype.addMine = function(mine) {
 }
 
 // TODO: change this to a single socket room
-Game.prototype.emit = function() {
-    var args = arguments;
+Game.prototype.emit = function(signal, data) {
+    if (!data.game) data.game = this.serialize();
     this.players.forEach(function(player) {
-        player.socket.emit.apply(player.socket, args)
+        player.socket.emit(signal, data);
     })
 }
 
@@ -76,17 +74,18 @@ var getGame = _.propFinder(games, 'code');
 var games = {};
 
 
-// Look up properties and get relevant objects
+// Look up properties and get relevant
+// todo: vivify data.name > data.player if game player exists
 function vivify(data, socket) {
     if (data.code) {
         if (!(data.code in games)) return socket.emit('bad_code');
         data.game = games[data.code];
+
+        if ('mine_index' in data) {
+            data.mine = data.game.getMine(data.mine_index);
+        }
     }
 
-    if (data.game && data.name) {
-        // TODO: look up player object in game.players
-        // ... except if this is coming from join_game, then there might not be a player yet
-    }
     return data;
 }
 
@@ -105,20 +104,37 @@ module.exports = function (socket) {
 
     socket.bind("new_game", function(data) {
         // expect: data.name
-        data = vivify(data, socket);
+        var payload = vivify(data, socket);
         var game = new Game();
         games[game.code] = game;
         game.populate();
-        game.addPlayer(data.name, socket);
+        game.addPlayer(payload.name, socket);
     })
 
     socket.bind("join_game", function(data) {
         // expect: data.code, data.name
-        data = vivify(data, socket);
-        if (data.game) data.game.addPlayer(data.name, socket)
+        var payload = vivify(data, socket);
+        if (payload.game) payload.game.addPlayer(payload.name, socket)
+    })
+
+
+    // GAMEPLAY
+    socket.bind("mine_level_up", function(data) {
+        // expect: data.code, data.mine_index
+        var payload = vivify(data, socket);
+        if (payload.mine && payload.game) {
+            payload.mine.levelUp();
+            payload.game.emit('update_mine', {
+                mine_index: data.mine_index,
+                mine: payload.mine.data()
+            })
+        }
     })
 };
 
+function debugGame() {
+    console.log('GAME:', games[Object.keys(games)[0]].serialize())
+}
 // ======  server/mine.js
 Mine.prototype.increment = function() {
    this.stage += 1; 

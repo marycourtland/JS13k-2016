@@ -49,6 +49,13 @@ Game.prototype.serialize = function() {
     return JSON.stringify(this.data());
 }
 
+// MINES
+Game.prototype.getMine = function(index) {
+    return this.mines[Math.min(index, this.mines.length - 1)]
+}
+
+
+
 //TEMPORARY DEBUGGING - TODO delete
 Game.prototype.log = function(text) {
     console.log(this.code + ' > ' + text);
@@ -73,7 +80,7 @@ function Mine(data) {
     this.words = data.words;
     this.coords = data.coords;
     this.game = data.game;
-    this.level = 0;
+    this.level = data.level || 0;
 }
 
 Mine.prototype = {};

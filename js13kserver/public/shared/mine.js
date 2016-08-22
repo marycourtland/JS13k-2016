@@ -11,7 +11,7 @@ function Mine(data) {
     this.words = data.words;
     this.coords = data.coords;
     this.game = data.game;
-    this.level = 0;
+    this.level = data.level || 0;
 }
 
 Mine.prototype = {};

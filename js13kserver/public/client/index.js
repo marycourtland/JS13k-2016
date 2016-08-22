@@ -5,6 +5,7 @@
     g.me = null;
     g.game = null;
 
+    // for the game intro
     var inputs = {
         startSignal: 'new_game',
         name: '',
@@ -14,7 +15,20 @@
 
     var socket; //Socket.IO client
 
-    // stage-switching
+    // gameplay actions
+    g.actions = {
+        'mine-level-up': function(i) {
+            var mine = g.game.mines[i];
+            console.log('Mine levelled up:', mine.getWord().text)
+            socket.emit('mine_level_up', {
+                code: g.game.code,
+                mine_index: i
+            })
+            mine.levelUp();
+            g.views.updateMine(i);
+        }
+    }
+
 
     // direct input
     var actionClicks = {
@@ -45,6 +59,12 @@
                 g.game.updateFromData(JSON.parse(data.game));
             }
             g.views.renderGame();
+        },
+
+        'update_mine': function(data) {
+            // expect: data.mine, data.mine_index
+            g.game.mines[data.mine_index] = new Mine(data.mine);
+            g.views.updateMine(data.mine_index);
         }
     }
 

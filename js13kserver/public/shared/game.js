@@ -40,6 +40,13 @@ Game.prototype.serialize = function() {
     return JSON.stringify(this.data());
 }
 
+// MINES
+Game.prototype.getMine = function(index) {
+    return this.mines[Math.min(index, this.mines.length - 1)]
+}
+
+
+
 //TEMPORARY DEBUGGING - TODO delete
 Game.prototype.log = function(text) {
     console.log(this.code + ' > ' + text);

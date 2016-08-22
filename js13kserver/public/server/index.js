@@ -2,17 +2,18 @@
 var games = {};
 
 
-// Look up properties and get relevant objects
+// Look up properties and get relevant
+// todo: vivify data.name > data.player if game player exists
 function vivify(data, socket) {
     if (data.code) {
         if (!(data.code in games)) return socket.emit('bad_code');
         data.game = games[data.code];
+
+        if ('mine_index' in data) {
+            data.mine = data.game.getMine(data.mine_index);
+        }
     }
 
-    if (data.game && data.name) {
-        // TODO: look up player object in game.players
-        // ... except if this is coming from join_game, then there might not be a player yet
-    }
     return data;
 }
 
@@ -31,17 +32,34 @@ module.exports = function (socket) {
 
     socket.bind("new_game", function(data) {
         // expect: data.name
-        data = vivify(data, socket);
+        var payload = vivify(data, socket);
         var game = new Game();
         games[game.code] = game;
         game.populate();
-        game.addPlayer(data.name, socket);
+        game.addPlayer(payload.name, socket);
     })
 
     socket.bind("join_game", function(data) {
         // expect: data.code, data.name
-        data = vivify(data, socket);
-        if (data.game) data.game.addPlayer(data.name, socket)
+        var payload = vivify(data, socket);
+        if (payload.game) payload.game.addPlayer(payload.name, socket)
+    })
+
+
+    // GAMEPLAY
+    socket.bind("mine_level_up", function(data) {
+        // expect: data.code, data.mine_index
+        var payload = vivify(data, socket);
+        if (payload.mine && payload.game) {
+            payload.mine.levelUp();
+            payload.game.emit('update_mine', {
+                mine_index: data.mine_index,
+                mine: payload.mine.data()
+            })
+        }
     })
 };
 
+function debugGame() {
+    console.log('GAME:', games[Object.keys(games)[0]].serialize())
+}

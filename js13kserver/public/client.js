@@ -49,9 +49,7 @@ Game.prototype.updateMines = function(player) {
         var mine = this.mines[i];
         var d = distance(player.coords, mine.coords);
         if (d < mine.getWord().distance) {
-            console.log('Mine levelled up:', mine.getWord().text)
-            mine.levelUp();
-            g.views.updateMine(i);
+            g.actions['mine-level-up'](i);
         }
         else {
             // render the mine text at a different size
@@ -92,6 +90,7 @@ window.$ = function(id) {
     g.me = null;
     g.game = null;
 
+    // for the game intro
     var inputs = {
         startSignal: 'new_game',
         name: '',
@@ -101,7 +100,20 @@ window.$ = function(id) {
 
     var socket; //Socket.IO client
 
-    // stage-switching
+    // gameplay actions
+    g.actions = {
+        'mine-level-up': function(i) {
+            var mine = g.game.mines[i];
+            console.log('Mine levelled up:', mine.getWord().text)
+            socket.emit('mine_level_up', {
+                code: g.game.code,
+                mine_index: i
+            })
+            mine.levelUp();
+            g.views.updateMine(i);
+        }
+    }
+
 
     // direct input
     var actionClicks = {
@@ -132,6 +144,12 @@ window.$ = function(id) {
                 g.game.updateFromData(JSON.parse(data.game));
             }
             g.views.renderGame();
+        },
+
+        'update_mine': function(data) {
+            // expect: data.mine, data.mine_index
+            g.game.mines[data.mine_index] = new Mine(data.mine);
+            g.views.updateMine(data.mine_index);
         }
     }
 
@@ -218,7 +236,7 @@ window.addEventListener("keyup", function(event) {
 // ======  client/math.js
 distance = function(v1, v2) { return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)); }
 // ======  client/mine.js
-var d0 = 100; // distance at which the first text starts enlarging
+var d0 = 200; // distance at which the first text starts enlarging
 
 Mine.prototype.getWord = function(i) {
     if (typeof i === 'undefined') i = this.level;
@@ -268,16 +286,16 @@ g.views.showIntro = function() {
 g.views.showNewGame = function() {
     $('game-new').hide();
     $('game-join').hide();
-    $('input-name').show();
     $('start').show();
+    $('input-name').show().focus();
 }
 
 g.views.showJoinGame = function() {
     $('game-new').hide();
     $('game-join').hide();
-    $('input-name').show();
     $('input-code').show();
     $('start').show();
+    $('input-name').show().focus();
 }
 
 // GAMEPLAY

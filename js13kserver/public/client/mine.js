@@ -1,4 +1,4 @@
-var d0 = 100; // distance at which the first text starts enlarging
+var d0 = 200; // distance at which the first text starts enlarging
 
 Mine.prototype.getWord = function(i) {
     if (typeof i === 'undefined') i = this.level;

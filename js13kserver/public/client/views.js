@@ -17,16 +17,16 @@ g.views.showIntro = function() {
 g.views.showNewGame = function() {
     $('game-new').hide();
     $('game-join').hide();
-    $('input-name').show();
     $('start').show();
+    $('input-name').show().focus();
 }
 
 g.views.showJoinGame = function() {
     $('game-new').hide();
     $('game-join').hide();
-    $('input-name').show();
     $('input-code').show();
     $('start').show();
+    $('input-name').show().focus();
 }
 
 // GAMEPLAY
