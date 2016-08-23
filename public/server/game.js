@@ -1,5 +1,5 @@
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player(name, this);
+    var newbie = new Player({name: name, game: this});
     newbie.socket = socket;
     // TODO: set player waypoint?
     // TODO: also give players some coords 
@@ -41,7 +41,8 @@ Game.prototype.addMine = function(mine) {
 }
 
 // TODO: change this to a single socket room
-Game.prototype.emit = function(signal, data) {
+Game.prototype.emit = function(signal, data, options) {
+    options = options || {};
     if (!data.game) data.game = this.serialize();
     this.players.forEach(function(player) {
         player.socket.emit(signal, data);

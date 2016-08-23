@@ -11,18 +11,28 @@ function Game(data) {
     this.waypoints = []; // locations where players can save the game
     this.stage = game_stages.intro;
     if (data) this.updateFromData(data);
+    this.init()
     this.log('game initialized')
 }
 
 Game.prototype = {};
 
+
+// TODO: find a better way to do this
+Game.prototype.init = function() {
+    this.getPlayer = _.propFinder(this.players, 'name')
+}
+
 Game.prototype.updateFromData = function(data) {
-    if (data.mines) {
-        data.mines = data.mines.map(function(mineData) { return new Mine(mineData); })
-    }
+    ['Mine', 'Player'].forEach(function(obj) {
+        var prop = obj.toLowerCase() + 's';
+        var Obj = eval(obj);
+        if (data[prop]) data[prop] = data[prop].map(function(d) { return new Obj(d); })
+    })
     for (var property in data) {
         this[property] = data[property];
     }
+    this.init();
 }
 
 Game.prototype.data = function() {
@@ -37,8 +47,10 @@ Game.prototype.data = function() {
 }
 
 Game.prototype.serialize = function() {
+    var d = this.data();
     return JSON.stringify(this.data());
 }
+
 
 // MINES
 Game.prototype.getMine = function(index) {

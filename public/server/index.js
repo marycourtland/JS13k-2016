@@ -12,6 +12,15 @@ function vivify(data, socket) {
         if ('mine_index' in data) {
             data.mine = data.game.getMine(data.mine_index);
         }
+
+        if ('name' in data) {
+            data.player = data.game.getPlayer(data.name);
+        }
+    }
+
+    if (data.coords) {
+        data.coords.x = parseFloat(data.coords.x);
+        data.coords.y = parseFloat(data.coords.y);
     }
 
     return data;
@@ -57,6 +66,25 @@ module.exports = function (socket) {
                 mine: payload.mine.data()
             })
         }
+    })
+    
+    socket.bind("player-update-coords", function(data) {
+        var payload = vivify(data, socket);
+        payload.player.coords = payload.coords;
+    })
+
+    // "Forwarding" signals: send the same event to all players in the game
+    var forwardSignals = [
+        'player-move-start',
+        'player-move-stop'
+    ]
+
+    forwardSignals.forEach(function(signal) {
+        socket.bind(signal, function(data) {
+            // no need to vivify
+            var game = games[data.code];
+            game.emit(signal, data);
+        })
     })
 };
 

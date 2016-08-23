@@ -111,6 +111,24 @@ window.$ = function(id) {
             })
             mine.levelUp();
             g.views.updateMine(i);
+        },
+
+        'player-move-start': function(data) {
+            data.code = g.game.code;
+            socket.emit('player-move-start', data);
+        },
+
+        'player-move-stop': function(data) {
+            data.code = g.game.code;
+            socket.emit('player-move-stop', data);
+        },
+
+        'player-update-coords': function() {
+            socket.emit('player-update-coords', {
+                code: g.game.code,
+                name: g.me.name,
+                coords: g.me.coords
+            })
         }
     }
 
@@ -138,24 +156,36 @@ window.$ = function(id) {
             // expect: data.game, data.name
             if (data.name === inputs.name) {
                 initGame(data);
+                g.views.renderGame();
             }
             else {
                 // TODO: aggregate the listening for game updates
-                g.game.updateFromData(JSON.parse(data.game));
+                var newbie = new Player({name: data.name, game: g.game});
+                g.game.players.push(newbie);
+                g.views.renderPlayer(newbie);
             }
-            g.views.renderGame();
         },
 
         'update_mine': function(data) {
             // expect: data.mine, data.mine_index
             g.game.mines[data.mine_index] = new Mine(data.mine);
             g.views.updateMine(data.mine_index);
-        }
+        },
+
+        'player-move-start': function(data) {
+            if (data.name === g.me.name) return; // i fired it
+            g.game.getPlayer(data.name).startMove(data.move_id, data.dir);
+        },
+
+        'player-move-stop': function(data) {
+            if (data.name === g.me.name) return; // i fired it
+            g.game.getPlayer(data.name).stopMove(data.move_id);
+        },
     }
 
     function initGame(data) {
         g.game = new Game(JSON.parse(data.game));
-        g.me = new Player(data.name);
+        g.me = g.game.getPlayer(data.name);
         g.views.showGame();
     }
 
@@ -185,54 +215,29 @@ window.$ = function(id) {
 
 })();
 // ======  client/keyboard.js
-var keyAnims = {};
-
-var dirs = {
-    left: xy(-1,0),
-    right: xy(1,0),
-    up: xy(0,-1),
-    down: xy(0,1)
+// map keycode > player movement direction
+var keyboardMovements = {
+    37: xy(-1,0),
+    39: xy(1,0),
+    38: xy(0,-1),
+    40: xy(0,1)
 }
-
-// these params get passed as an Animation
-var inputControlMap = {
-    37: {
-        onStart: function() { g.me.move(dirs.left); },
-        onFrame: function() { g.me.move(dirs.left); },
-    },
-    39: {
-        onStart: function() { g.me.move(dirs.right); },
-        onFrame: function() { g.me.move(dirs.right); },
-    },
-    38: {
-        onStart: function() { g.me.move(dirs.up); },
-        onFrame: function() { g.me.move(dirs.up); },
-    },
-    40: {
-        onStart: function() { g.me.move(dirs.down); },
-        onFrame: function() { g.me.move(dirs.down); },
-    }
-}
-
 
 window.addEventListener("keydown", function(event) {
-    var params = inputControlMap[event.which];
-    if (params && !keyAnims[event.which]) {
+    var key = event.which;
+    if (key in keyboardMovements) {
         event.preventDefault();
-        var anim  = new Animation(params)
-        anim.start();
-        keyAnims[event.which] = anim;
-    }
-});
+        g.me.startMove(key, keyboardMovements[key]);
+    }    
+})
 
 window.addEventListener("keyup", function(event) {
-    var anim = keyAnims[event.which];
-    if (anim) {
+    var key = event.which;
+    if (key in keyboardMovements) {
         event.preventDefault();
-        anim.stop();
-        keyAnims[event.which] = null;
-    }
-});
+        g.me.stopMove(key);
+    }    
+})
 // ======  client/math.js
 distance = function(v1, v2) { return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)); }
 // ======  client/mine.js
@@ -259,12 +264,46 @@ Mine.prototype.interpolateSize = function(distance, i) {
 // ======  client/player.js
 var velocity = 5;
 
+Player.prototype.isMe = function() {
+    return this.name === g.me.name;
+}
+
 Player.prototype.move = function(dir) {
     // dir should be coords
     this.coords.x += dir.x * velocity;
     this.coords.y += dir.y * velocity;
     g.game.updateMines(g.me);
-    g.views.updatePlayer();
+    g.views.updatePlayer(this);
+}
+
+
+Player.prototype.startMove = function(id, dir) {
+    this.moves = this.moves || {};
+    if (id in this.moves) return;
+    var self = this;
+    var anim = new Animation({
+        onStart: function() { self.move(dir); },
+        onFrame: function() { self.move(dir); }
+    })
+    this.moves[id] = anim;
+    anim.start();
+    if (this.isMe()) g.actions['player-move-start']({
+        name: this.name,
+        move_id: this.name + '-move-' + id,
+        dir: dir
+    });
+}
+
+Player.prototype.stopMove = function(id) {
+    if (!(id in this.moves)) return;
+    this.moves[id].stop();
+    if (this.isMe()) g.actions['player-move-stop']({
+        name: this.name,
+        move_id: this.name + '-move-' + id,
+        final_coords: this.coords
+    });
+    delete this.moves[id];
+    g.actions['player-update-coords']();
 }
 // ======  client/views.js
 window.g = window.g || {};
@@ -311,22 +350,24 @@ g.views.renderGame = function() {
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
-        var $mine = $(document.createElement('span'));
-        $mine.className = 'mine';
-        $mine.id = 'mine-' + i;
-        $('gameplay').appendChild($mine); 
-        g.views.updateMine(i);
+        g.views.renderMine(i);
     }
 
     // Render player
-    g.views.updatePlayer()
+    g.game.players.forEach(function(player) {
+        g.views.renderPlayer(player);
+    })
 }
 
-g.views.updatePlayer = function() {
-    $('player').show().css({
-        left: g.me.coords.x + 'px',
-        top: g.me.coords.y + 'px'
-    })
+
+// mines
+
+g.views.renderMine = function(index) {
+    var $mine = $(document.createElement('div'));
+    $mine.className = 'mine';
+    $mine.id = 'mine-' + index;
+    $('gameplay').appendChild($mine); 
+    g.views.updateMine(index);
 }
 
 g.views.updateMine = function(index, size) {
@@ -337,5 +378,25 @@ g.views.updateMine = function(index, size) {
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
+    })
+}
+
+
+// player avatars
+
+g.views.renderPlayer = function(player) {
+    player = player || g.me;
+    var $player = $(document.createElement('div'));
+    $player.className = 'player';
+    $player.id = 'player-' + player.name;
+    $('gameplay').appendChild($player); 
+    g.views.updatePlayer(player);
+}
+
+g.views.updatePlayer = function(player) {
+    player = player || g.me;
+    $('player-' +  player.name).show().css({
+        left: player.coords.x + 'px',
+        top: player.coords.y + 'px'
     })
 }

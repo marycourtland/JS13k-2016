@@ -42,22 +42,24 @@ g.views.renderGame = function() {
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
-        var $mine = $(document.createElement('span'));
-        $mine.className = 'mine';
-        $mine.id = 'mine-' + i;
-        $('gameplay').appendChild($mine); 
-        g.views.updateMine(i);
+        g.views.renderMine(i);
     }
 
     // Render player
-    g.views.updatePlayer()
+    g.game.players.forEach(function(player) {
+        g.views.renderPlayer(player);
+    })
 }
 
-g.views.updatePlayer = function() {
-    $('player').show().css({
-        left: g.me.coords.x + 'px',
-        top: g.me.coords.y + 'px'
-    })
+
+// mines
+
+g.views.renderMine = function(index) {
+    var $mine = $(document.createElement('div'));
+    $mine.className = 'mine';
+    $mine.id = 'mine-' + index;
+    $('gameplay').appendChild($mine); 
+    g.views.updateMine(index);
 }
 
 g.views.updateMine = function(index, size) {
@@ -68,5 +70,25 @@ g.views.updateMine = function(index, size) {
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
+    })
+}
+
+
+// player avatars
+
+g.views.renderPlayer = function(player) {
+    player = player || g.me;
+    var $player = $(document.createElement('div'));
+    $player.className = 'player';
+    $player.id = 'player-' + player.name;
+    $('gameplay').appendChild($player); 
+    g.views.updatePlayer(player);
+}
+
+g.views.updatePlayer = function(player) {
+    player = player || g.me;
+    $('player-' +  player.name).show().css({
+        left: player.coords.x + 'px',
+        top: player.coords.y + 'px'
     })
 }

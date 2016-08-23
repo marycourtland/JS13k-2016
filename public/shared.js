@@ -20,18 +20,28 @@ function Game(data) {
     this.waypoints = []; // locations where players can save the game
     this.stage = game_stages.intro;
     if (data) this.updateFromData(data);
+    this.init()
     this.log('game initialized')
 }
 
 Game.prototype = {};
 
+
+// TODO: find a better way to do this
+Game.prototype.init = function() {
+    this.getPlayer = _.propFinder(this.players, 'name')
+}
+
 Game.prototype.updateFromData = function(data) {
-    if (data.mines) {
-        data.mines = data.mines.map(function(mineData) { return new Mine(mineData); })
-    }
+    ['Mine', 'Player'].forEach(function(obj) {
+        var prop = obj.toLowerCase() + 's';
+        var Obj = eval(obj);
+        if (data[prop]) data[prop] = data[prop].map(function(d) { return new Obj(d); })
+    })
     for (var property in data) {
         this[property] = data[property];
     }
+    this.init();
 }
 
 Game.prototype.data = function() {
@@ -46,8 +56,10 @@ Game.prototype.data = function() {
 }
 
 Game.prototype.serialize = function() {
+    var d = this.data();
     return JSON.stringify(this.data());
 }
+
 
 // MINES
 Game.prototype.getMine = function(index) {
@@ -106,12 +118,13 @@ Mine.prototype.levelDown = function() {
     this.render();
 }
 // ======  shared/player.js
-function Player(name, game) {
-    this.name = name;
-    this.game = game;
-    this.waypoint = xy(0,0);
-    this.glitchLevel = 0;
-    this.coords = xy(100,100);
+function Player(data) {
+    data = data || {};
+    this.name = data.name;
+    this.game = data.game;
+    this.waypoint = data.waypoint || xy(0,0);
+    this.glitchLevel = data.glitchLevel || 0;
+    this.coords = data.coords || xy(100,100);
 }
 
 Player.prototype = {};
@@ -121,7 +134,8 @@ Player.prototype.data = function() {
         name: this.name,
         game: this.game.code,
         waypoint: this.waypoint,
-        glitchLevel: this.glitchLevel
+        glitchLevel: this.glitchLevel,
+        coords: this.coords
     }
 }
 // ======  shared/socket.js
