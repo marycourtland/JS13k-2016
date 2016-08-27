@@ -8,8 +8,16 @@ Player.prototype.move = function(dir) {
     // dir should be coords
     this.coords.x += dir.x * velocity;
     this.coords.y += dir.y * velocity;
+    this.checkMargin();
     g.game.updateMines(g.me);
     g.views.updatePlayer(this);
+}
+
+Player.prototype.checkMargin = function() {
+    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width - g.settings.margin));
+    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.settings.margin));
+    var margin = margin1 || margin2;
+    if (margin !== 0) g.views.moveFrame(margin);
 }
 
 

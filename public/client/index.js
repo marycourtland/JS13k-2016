@@ -143,6 +143,8 @@
     }
 
     function onLoad() {
+        g.bbox = document.body.getBoundingClientRect();
+        g.frame = xy(0, 0);
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {

@@ -228,6 +228,8 @@ window.$ = function(id) {
     }
 
     function onLoad() {
+        g.bbox = document.body.getBoundingClientRect();
+        g.frame = xy(0, 0);
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {
@@ -297,8 +299,16 @@ Player.prototype.move = function(dir) {
     // dir should be coords
     this.coords.x += dir.x * velocity;
     this.coords.y += dir.y * velocity;
+    this.checkMargin();
     g.game.updateMines(g.me);
     g.views.updatePlayer(this);
+}
+
+Player.prototype.checkMargin = function() {
+    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width - g.settings.margin));
+    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.settings.margin));
+    var margin = margin1 || margin2;
+    if (margin !== 0) g.views.moveFrame(margin);
 }
 
 
@@ -330,6 +340,10 @@ Player.prototype.stopMove = function(id) {
     delete this.moves[id];
     g.actions['player-update-coords']();
 }
+// ======  client/settings.js
+g.settings = {};
+
+g.settings.margin = 100; // px
 // ======  client/views.js
 window.g = window.g || {};
 
@@ -384,6 +398,12 @@ g.views.renderGame = function() {
     })
 }
 
+g.views.moveFrame = function(distance) {
+    // only horizontal movement
+    // TODO: clinch it between left and right borders
+    g.frame.x += distance;
+    $('gameplay').css({'left': '-' + g.frame.x + 'px'})
+}
 
 // mines
 
