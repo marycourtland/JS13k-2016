@@ -37,7 +37,7 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('players').text("team: " + _.mapProp(g.game.players, 'name').join(', '));
+    $('players').text("team: @" + _.mapProp(g.game.players, 'name').join(', @'));
     $('code').text("game code: " + g.game.code);
 
     // Render mines
@@ -72,8 +72,10 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
-    var text = g.glitch.transform(word.text, word.glitchLevel);
-    $mine.text(text).css({
+    var lines = word.text.split('\n').map(function(l) {
+        return g.glitch.transform(l, word.glitchLevel);
+    })
+    $mine.html(lines.join('<br/>')).css({
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
@@ -94,7 +96,7 @@ g.views.renderPlayer = function(player) {
 
 g.views.updatePlayer = function(player) {
     player = player || g.me;
-    var name = g.glitch.transform(player.name, player.glitchLevel);
+    var name = g.glitch.transform('@' + player.name, player.glitchLevel);
     $('player-' +  player.name).show().text(name).css({
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'

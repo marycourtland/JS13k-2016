@@ -31,7 +31,7 @@
 
     #gameplay {
         height: 600px;
-        width: 20000px;
+        width: 50000px;
         margin: 0 auto;
         background: rgba(0,0,0,0.5);
         position: relative;
@@ -51,7 +51,7 @@
 
         .mine {
             white-space: nowrap; 
-            transform: translate(-50%,-0.4em);
+            transform: translate(-50%,-50%);
         }
 
     #players, #code, #instructions {
@@ -92,6 +92,28 @@
 <script src="/socket.io/socket.io.js"></script>
 <script src="/shared.js"></script>
 <script src="/client.js"></script>
+
+<script>
+    // TEMPORARY FOR DEVELOPMENT ONLY. New mine template :)
+    $('gameplay').bind('click', function(e) {
+        var coords = JSON.stringify(xy(
+            e.clientX - e.target.offsetLeft,
+            e.clientY - e.target.offsetTop
+        )).replace(/"/g, '');
+
+        var lines = [
+            "{",
+            "    coords: " + coords + ",",
+            "    words: [",
+            "        {size: 10, glitchLevel:0, distance: 100, text:'word1'},",
+            "        {size: 10, glitchLevel:0, distance: 100, text:'word2'},",
+            "        {size: 10, glitchLevel:0, distance: 100, text:'word3'},",
+            "    ]",
+            "}"
+        ];
+        console.log(lines.join('\n'));
+    });
+</script>
 
 </body>
 </html>

@@ -1,3 +1,3 @@
 g.settings = {};
 
-g.settings.margin = 200; // px
+g.settings.margin = 300; // px

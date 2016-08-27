@@ -1,27 +1,3 @@
-var sampleMines = [
-    {
-        coords: xy(50, 50),
-        words: [
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: '[checkpoint]'}
-        ]
-    },
-    {
-        coords: xy(400, 500),
-        words: [
-            {size:12, glitchLevel: 0, distance: 150, text: 'a drifting space station'},
-            {size:16, glitchLevel: 0, distance: 0, text: "it's a huge wreck"}
-        ]
-    },
-    {
-        coords: xy(550, 250),
-        words: [
-            {size:12, glitchLevel: 0, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', trigger: 'death'},
-            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', trigger: 'death'}
-        ]
-    }
-]
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(50,50)});
     newbie.socket = socket;
@@ -39,9 +15,8 @@ Game.prototype.addPlayer = function(name, socket) {
 }
 
 Game.prototype.populate = function() {
-    // Sample data for now
     var self = this;
-    sampleMines.forEach(function(m) {
+    mineData.forEach(function(m) {
         m.game = self;
         self.addMine(new Mine(m));
     })

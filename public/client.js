@@ -91,6 +91,7 @@ window.$ = function(id) {
     if (!$el) return $el;
 
     $el.text = function(text) { $el.textContent = text; return this; }
+    $el.html = function(html) { $el.innerHTML = html; return this; }
 
     $el.css = function(css) {
         for (var prop in css) $el.style[prop] = css[prop];
@@ -364,7 +365,7 @@ Player.prototype.stopMove = function(id) {
 // ======  client/settings.js
 g.settings = {};
 
-g.settings.margin = 200; // px
+g.settings.margin = 300; // px
 // ======  client/views.js
 window.g = window.g || {};
 
@@ -405,7 +406,7 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('players').text("team: " + _.mapProp(g.game.players, 'name').join(', '));
+    $('players').text("team: @" + _.mapProp(g.game.players, 'name').join(', @'));
     $('code').text("game code: " + g.game.code);
 
     // Render mines
@@ -440,8 +441,10 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
-    var text = g.glitch.transform(word.text, word.glitchLevel);
-    $mine.text(text).css({
+    var lines = word.text.split('\n').map(function(l) {
+        return g.glitch.transform(l, word.glitchLevel);
+    })
+    $mine.html(lines.join('<br/>')).css({
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
@@ -462,7 +465,7 @@ g.views.renderPlayer = function(player) {
 
 g.views.updatePlayer = function(player) {
     player = player || g.me;
-    var name = g.glitch.transform(player.name, player.glitchLevel);
+    var name = g.glitch.transform('@' + player.name, player.glitchLevel);
     $('player-' +  player.name).show().text(name).css({
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'

@@ -139,7 +139,7 @@ Player.prototype.updateFromData = function(data) {
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
-    this.coords = data.coords || xy(100,100);
+    this.coords = data.coords || xy(70,70);
 }
 
 

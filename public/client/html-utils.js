@@ -4,6 +4,7 @@ window.$ = function(id) {
     if (!$el) return $el;
 
     $el.text = function(text) { $el.textContent = text; return this; }
+    $el.html = function(html) { $el.innerHTML = html; return this; }
 
     $el.css = function(css) {
         for (var prop in css) $el.style[prop] = css[prop];
