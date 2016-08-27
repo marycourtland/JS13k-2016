@@ -57,9 +57,10 @@ module.exports = function (socket) {
 
     // GAMEPLAY
     socket.bind("mine_level_up", function(data) {
-        // expect: data.code, data.mine_index
+        // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
+            payload.mine.trigger(payload.player);
             payload.mine.levelUp();
             payload.game.emit('update_mine', {
                 mine_index: data.mine_index,
@@ -73,7 +74,10 @@ module.exports = function (socket) {
         payload.player.coords = payload.coords;
     })
 
+
+
     // "Forwarding" signals: send the same event to all players in the game
+    // (with no involvement from the server)
     var forwardSignals = [
         'player-move-start',
         'player-move-stop'
@@ -82,8 +86,7 @@ module.exports = function (socket) {
     forwardSignals.forEach(function(signal) {
         socket.bind(signal, function(data) {
             // no need to vivify
-            var game = games[data.code];
-            game.emit(signal, data);
+            games[data.code].emit(signal, data);
         })
     })
 };

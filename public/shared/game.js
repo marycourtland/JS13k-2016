@@ -8,7 +8,7 @@ function Game(data) {
     this.code = Math.round(Math.random() * 1e4).toString();
     this.players = [];
     this.mines = [];
-    this.waypoints = []; // locations where players can save the game
+    this.checkpoints = []; // locations where players can save the game
     this.stage = game_stages.intro;
     if (data) this.updateFromData(data);
     this.init()
@@ -40,7 +40,7 @@ Game.prototype.data = function() {
     return {
         code: this.code,
         stage: this.stage,
-        waypoints: this.waypoints,
+        checkpoints: this.checkpoints,
         mines: this.mines.map(getData),
         players: this.players.map(getData)
     }

@@ -20,11 +20,13 @@
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             console.log('Mine levelled up:', mine.getWord().text)
-            socket.emit('mine_level_up', {
-                code: g.game.code,
-                mine_index: i
-            })
             mine.levelUp();
+            if (!mine.getWord().singlePlayerOnly)
+                socket.emit('mine_level_up', {
+                    code: g.game.code,
+                    name: g.me.name,
+                    mine_index: i
+                })
             g.views.updateMine(i);
         },
 
@@ -88,14 +90,37 @@
         },
 
         'player-move-start': function(data) {
-            if (data.name === g.me.name) return; // i fired it
-            g.game.getPlayer(data.name).startMove(data.move_id, data.dir);
+            if (data.name !== g.me.name) 
+                g.game.getPlayer(data.name).startMove(data.move_id, data.dir);
         },
 
         'player-move-stop': function(data) {
-            if (data.name === g.me.name) return; // i fired it
-            g.game.getPlayer(data.name).stopMove(data.move_id);
+            if (data.name !== g.me.name) 
+                g.game.getPlayer(data.name).stopMove(data.move_id);
         },
+
+        'player-update-coords': function(data) {
+            if (data.name !== g.me.name)
+                socket.emit('player-update-coords', {
+                    code: g.game.code,
+                    name: g.me.name,
+                    coords: g.me.coords
+                })
+        },
+
+        'checkpoint': function(data) {
+            g.me.checkpoint = data.coords;
+            console.log('CHECKPOINT:', data.coords);
+        },
+
+        'die': function(data) {
+            var player = g.game.getPlayer(data.name);
+            player.updateFromData(data.player);
+            if (data.name === g.me.name) {
+                console.log('DEAD') 
+            }
+            g.views.updatePlayer(player);
+        }
     }
 
     function initGame(data) {

@@ -3,7 +3,8 @@
 //   text: 'abc',    // displayed word
 //   size: 12,       // displayed size
 //   glitchLevel: 2, // displayed glitch level
-//   distance: 30    // distance at which it increments to next word
+//   distance: 30,   // distance at which it increments to next word
+//   trigger: 'whatever' // optional action to trigger
 // }
 
 function Mine(data) {
@@ -12,6 +13,7 @@ function Mine(data) {
     this.coords = data.coords;
     this.game = data.game;
     this.level = data.level || 0;
+    this.singlePlayerOnly = data.singlePlayerOnly || false;
 }
 
 Mine.prototype = {};
@@ -21,7 +23,8 @@ Mine.prototype.data = function() {
         words: this.words,
         coords: this.coords,
         game: this.game.code,
-        level: this.level
+        level: this.level,
+        singlePlayerOnly: this.singlePlayerOnly
     }
 }
 

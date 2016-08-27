@@ -1,8 +1,32 @@
 // ======  server/game.js
+var sampleMines = [
+    {
+        coords: xy(50, 50),
+        words: [
+            {size:10, glitchLevel: 0, distance: 20, text: 'checkpoint', trigger: 'checkpoint'},
+            {size:10, glitchLevel: 0, distance: 0, text: "checked"}
+        ]
+    },
+    {
+        coords: xy(400, 500),
+        words: [
+            {size:12, glitchLevel: 0, distance: 150, text: 'a drifting space station'},
+            {size:16, glitchLevel: 2, distance: 0, text: "it's a huge wreck"}
+        ]
+    },
+    {
+        coords: xy(550, 250),
+        words: [
+            {size:12, glitchLevel: 0, distance: 120, text: 'a shining speck of light',},
+            {size:18, glitchLevel: 3, distance: 80, text: 'noise and chaos', trigger: 'death'},
+            {size:36, glitchLevel: 5, distance: 0, text: 'EXPLOSION'}
+        ]
+    }
+]
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player({name: name, game: this});
+    var newbie = new Player({name: name, game: this, checkpoint: xy(50,50)});
     newbie.socket = socket;
-    // TODO: set player waypoint?
+    // TODO: set player checkpoint?
     // TODO: also give players some coords 
 
     this.players.push(newbie);
@@ -17,24 +41,11 @@ Game.prototype.addPlayer = function(name, socket) {
 
 Game.prototype.populate = function() {
     // Sample data for now
-    this.addMine(new Mine({
-        game: this,
-        coords: xy(400, 500),
-        words: [
-            {text: 'a drifting space station', size:12, glitchLevel: 0, distance: 150},
-            {text: "it's a huge wreck", size:16, glitchLevel: 2, distance: 0}
-        ]
-    }))
-
-    this.addMine(new Mine({
-        game: this,
-        coords: xy(550, 250),
-        words: [
-            {text: 'a shining speck of light', size:12, glitchLevel: 0, distance: 120},
-            {text: 'noise and chaos', size:18, glitchLevel: 3, distance: 80},
-            {text: 'EXPLOSION', size:36, glitchLevel: 5, distance: 0}
-        ]
-    }))
+    var self = this;
+    sampleMines.forEach(function(m) {
+        m.game = self;
+        self.addMine(new Mine(m));
+    })
 }
 
 Game.prototype.addMine = function(mine) {
@@ -130,9 +141,10 @@ module.exports = function (socket) {
 
     // GAMEPLAY
     socket.bind("mine_level_up", function(data) {
-        // expect: data.code, data.mine_index
+        // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
+            payload.mine.trigger(payload.player);
             payload.mine.levelUp();
             payload.game.emit('update_mine', {
                 mine_index: data.mine_index,
@@ -146,7 +158,10 @@ module.exports = function (socket) {
         payload.player.coords = payload.coords;
     })
 
+
+
     // "Forwarding" signals: send the same event to all players in the game
+    // (with no involvement from the server)
     var forwardSignals = [
         'player-move-start',
         'player-move-stop'
@@ -155,8 +170,7 @@ module.exports = function (socket) {
     forwardSignals.forEach(function(signal) {
         socket.bind(signal, function(data) {
             // no need to vivify
-            var game = games[data.code];
-            game.emit(signal, data);
+            games[data.code].emit(signal, data);
         })
     })
 };
@@ -167,4 +181,35 @@ function debugGame() {
 // ======  server/mine.js
 Mine.prototype.increment = function() {
    this.stage += 1; 
+}
+
+Mine.prototype.trigger = function(player) {
+    var t = this.words[this.level].trigger;
+    if (t in Triggers) Triggers[t](player, this);
+}
+// ======  server/player.js
+Player.prototype.setCheckpoint = function(coords) {
+    this.checkpoint = coords;
+    this.socket.emit('checkpoint', {
+        coords: coords
+    })
+}
+
+Player.prototype.die = function() {
+    this.coords = this.checkpoint;
+    this.game.emit('die', {
+        name: this.name,
+        player: this.data()
+    });
+}
+// ======  server/triggers.js
+var Triggers = {};
+
+Triggers['death'] = function(player, mine) {
+    console.log('TRIGGERING death')
+    player.die();
+}
+
+Triggers['checkpoint'] = function(player, mine) {
+    player.setCheckpoint(mine.coords);
 }

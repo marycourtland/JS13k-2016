@@ -17,7 +17,7 @@ function Game(data) {
     this.code = Math.round(Math.random() * 1e4).toString();
     this.players = [];
     this.mines = [];
-    this.waypoints = []; // locations where players can save the game
+    this.checkpoints = []; // locations where players can save the game
     this.stage = game_stages.intro;
     if (data) this.updateFromData(data);
     this.init()
@@ -49,7 +49,7 @@ Game.prototype.data = function() {
     return {
         code: this.code,
         stage: this.stage,
-        waypoints: this.waypoints,
+        checkpoints: this.checkpoints,
         mines: this.mines.map(getData),
         players: this.players.map(getData)
     }
@@ -84,7 +84,8 @@ function xy(x, y) {
 //   text: 'abc',    // displayed word
 //   size: 12,       // displayed size
 //   glitchLevel: 2, // displayed glitch level
-//   distance: 30    // distance at which it increments to next word
+//   distance: 30,   // distance at which it increments to next word
+//   trigger: 'whatever' // optional action to trigger
 // }
 
 function Mine(data) {
@@ -93,6 +94,7 @@ function Mine(data) {
     this.coords = data.coords;
     this.game = data.game;
     this.level = data.level || 0;
+    this.singlePlayerOnly = data.singlePlayerOnly || false;
 }
 
 Mine.prototype = {};
@@ -102,7 +104,8 @@ Mine.prototype.data = function() {
         words: this.words,
         coords: this.coords,
         game: this.game.code,
-        level: this.level
+        level: this.level,
+        singlePlayerOnly: this.singlePlayerOnly
     }
 }
 
@@ -120,20 +123,25 @@ Mine.prototype.levelDown = function() {
 // ======  shared/player.js
 function Player(data) {
     data = data || {};
+    this.updateFromData(data);
+}
+
+Player.prototype = {};
+
+Player.prototype.updateFromData = function(data) {
     this.name = data.name;
     this.game = data.game;
-    this.waypoint = data.waypoint || xy(0,0);
+    this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
     this.coords = data.coords || xy(100,100);
 }
 
-Player.prototype = {};
 
 Player.prototype.data = function() {
     return {
         name: this.name,
         game: this.game.code,
-        waypoint: this.waypoint,
+        checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,
         coords: this.coords
     }

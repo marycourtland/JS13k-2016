@@ -78,7 +78,7 @@ g.views.updateMine = function(index, size) {
 
 g.views.renderPlayer = function(player) {
     player = player || g.me;
-    var $player = $(document.createElement('div'));
+    var $player = $(document.createElement('div')).text(player.name);
     $player.className = 'player';
     $player.id = 'player-' + player.name;
     $('gameplay').appendChild($player); 
