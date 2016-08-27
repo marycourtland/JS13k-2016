@@ -111,6 +111,12 @@ Mine.prototype.data = function() {
 
 Mine.prototype.render = function() {}; // client will overwrite
 
+Mine.prototype.getWord = function(i) {
+    if (typeof i === 'undefined') i = this.level;
+    return this.words[Math.min(i, this.words.length - 1)];
+}
+
+
 Mine.prototype.levelUp = function() {
     this.level += 1;
     this.render();

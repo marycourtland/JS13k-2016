@@ -1,10 +1,5 @@
 var d0 = 200; // distance at which the first text starts enlarging
 
-Mine.prototype.getWord = function(i) {
-    if (typeof i === 'undefined') i = this.level;
-    return this.words[Math.min(i, this.words.length - 1)];
-}
-
 Mine.prototype.interpolateSize = function(distance, i) {
     var word = this.getWord(i);
     if (i >= this.words.length - 1) return word.size;

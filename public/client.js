@@ -58,6 +58,32 @@ Game.prototype.updateMines = function(player) {
     } 
 }
 
+// ======  client/glitch.js
+window.g = window.g || {};
+g.glitch = {};
+
+g.glitch.chars = [];
+
+for (var i = 768; i <= 879; i++) {
+    g.glitch.chars.push(String.fromCharCode(i));
+}
+
+
+g.glitch.transform = function(text, level) {
+    var chars = text.split('').map(function(char) {
+        for (var i = 0; i < level; i++) {
+            char += choice(g.glitch.chars);
+        }
+        return char;
+    })
+    return chars.join('');
+}
+
+// TODO: is this elsewhere in the codebase? D:
+var choice = function(array) {
+    var i = Math.floor(Math.random() * array.length);
+    return array[i];
+}
 // ======  client/html-utils.js
 window.$ = function(id) {
     var $el = (typeof id === 'string') ? document.getElementById(id) : id;
@@ -270,11 +296,6 @@ distance = function(v1, v2) { return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.p
 // ======  client/mine.js
 var d0 = 200; // distance at which the first text starts enlarging
 
-Mine.prototype.getWord = function(i) {
-    if (typeof i === 'undefined') i = this.level;
-    return this.words[Math.min(i, this.words.length - 1)];
-}
-
 Mine.prototype.interpolateSize = function(distance, i) {
     var word = this.getWord(i);
     if (i >= this.words.length - 1) return word.size;
@@ -343,7 +364,7 @@ Player.prototype.stopMove = function(id) {
 // ======  client/settings.js
 g.settings = {};
 
-g.settings.margin = 100; // px
+g.settings.margin = 200; // px
 // ======  client/views.js
 window.g = window.g || {};
 
@@ -419,7 +440,8 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
-    $mine.text(word.text).css({
+    var text = g.glitch.transform(word.text, word.glitchLevel);
+    $mine.text(text).css({
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
@@ -431,7 +453,7 @@ g.views.updateMine = function(index, size) {
 
 g.views.renderPlayer = function(player) {
     player = player || g.me;
-    var $player = $(document.createElement('div')).text(player.name);
+    var $player = $(document.createElement('div'));
     $player.className = 'player';
     $player.id = 'player-' + player.name;
     $('gameplay').appendChild($player); 
@@ -440,7 +462,8 @@ g.views.renderPlayer = function(player) {
 
 g.views.updatePlayer = function(player) {
     player = player || g.me;
-    $('player-' +  player.name).show().css({
+    var name = g.glitch.transform(player.name, player.glitchLevel);
+    $('player-' +  player.name).show().text(name).css({
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })

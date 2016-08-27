@@ -72,7 +72,8 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
-    $mine.text(word.text).css({
+    var text = g.glitch.transform(word.text, word.glitchLevel);
+    $mine.text(text).css({
         'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
@@ -84,7 +85,7 @@ g.views.updateMine = function(index, size) {
 
 g.views.renderPlayer = function(player) {
     player = player || g.me;
-    var $player = $(document.createElement('div')).text(player.name);
+    var $player = $(document.createElement('div'));
     $player.className = 'player';
     $player.id = 'player-' + player.name;
     $('gameplay').appendChild($player); 
@@ -93,7 +94,8 @@ g.views.renderPlayer = function(player) {
 
 g.views.updatePlayer = function(player) {
     player = player || g.me;
-    $('player-' +  player.name).show().css({
+    var name = g.glitch.transform(player.name, player.glitchLevel);
+    $('player-' +  player.name).show().text(name).css({
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })

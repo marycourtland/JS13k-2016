@@ -2,23 +2,23 @@ var sampleMines = [
     {
         coords: xy(50, 50),
         words: [
-            {size:10, glitchLevel: 0, distance: 20, text: 'checkpoint', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: "checked"}
+            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint', trigger: 'checkpoint'},
+            {size:10, glitchLevel: 0, distance: 0, text: '[checkpoint]'}
         ]
     },
     {
         coords: xy(400, 500),
         words: [
             {size:12, glitchLevel: 0, distance: 150, text: 'a drifting space station'},
-            {size:16, glitchLevel: 2, distance: 0, text: "it's a huge wreck"}
+            {size:16, glitchLevel: 0, distance: 0, text: "it's a huge wreck"}
         ]
     },
     {
         coords: xy(550, 250),
         words: [
             {size:12, glitchLevel: 0, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 3, distance: 80, text: 'noise and chaos', trigger: 'death'},
-            {size:36, glitchLevel: 5, distance: 0, text: 'EXPLOSION'}
+            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', trigger: 'death'},
+            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', trigger: 'death'}
         ]
     }
 ]

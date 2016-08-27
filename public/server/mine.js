@@ -3,6 +3,6 @@ Mine.prototype.increment = function() {
 }
 
 Mine.prototype.trigger = function(player) {
-    var t = this.words[this.level].trigger;
+    var t = this.getWord().trigger;
     if (t in Triggers) Triggers[t](player, this);
 }
