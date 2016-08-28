@@ -376,7 +376,8 @@ g.views = {};
 // INTRO
 
 g.views.showIntro = function() {
-    $('game').hide();
+    $('gameplay').hide();
+    $('sidebar').hide();
     $('input-name').hide();
     $('input-code').hide();
     $('start').hide();
@@ -402,11 +403,12 @@ g.views.showJoinGame = function() {
 
 g.views.showGame = function() {
     $('intro').hide();
-    $('game').show();
+    $('gameplay').show();
+    $('sidebar').show();
 }
 
 g.views.renderGame = function() {
-    $('players').text("team: @" + _.mapProp(g.game.players, 'name').join(', @'));
+    $('players').html("team:<br>@" + _.mapProp(g.game.players, 'name').join('<br>@'));
     $('code').text("game code: " + g.game.code);
 
     // Render mines

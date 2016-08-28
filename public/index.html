@@ -14,29 +14,65 @@
         margin: 0;
         overflow: hidden;
     }
-    h1 {
+    h1, h2 {
         color: #789;
         text-align: left;
-        padding-left: 1rem;
+        margin: 10px 2px;
+        font-size: 3rem;
+    }
+
+    h2 {
+        font-size: 1rem;
+    }
+
+    h1, h2, button, input, .mine, .player,
+    #players, #code, #instructions {
+        font-weight: bold;
+        text-transform: uppercase;
+        transform: scaleY(1.4);
+        letter-spacing: 0.05em;
     }
 
     button {
-        color: #334;
+        background: #7AA396;
+        color: rgb(11, 28, 37);
+    }
+
+    button, input {
+        font-size: 24px;
+        line-height: 1.2em;
+        text-align: center;
+        margin-bottom: 2rem;
+        width: 30rem;
+        display: block;
+        margin: 2rem auto;
     }
 
     #game {
         margin: 0 auto;
         width: 100%;
+        height: 600px;
+        position: relative;
+        background: rgba(0,0,0,0.5);
+        border-bottom: 3px solid #95B6AC;
+    }
+
+    #intro {
+        position: absolute;
+        top: 0;
+        width: 100%;
+        margin-top: 200px;
+
+    }
+
+    #sidebar {
+        float: left;
     }
 
     #gameplay {
-        height: 600px;
         width: 50000px;
         margin: 0 auto;
-        background: rgba(0,0,0,0.5);
         position: relative;
-        border: 2px solid white;
-        border-width: 2px 0
     }
 
         #gameplay * {
@@ -51,7 +87,7 @@
 
         .mine {
             white-space: nowrap; 
-            transform: translate(-50%,-50%);
+            transform: translate(-50%,-50%) scaleY(1.4);
         }
 
     #players, #code, #instructions {
@@ -59,6 +95,7 @@
         font-size: 12px;
         line-height: 1.5em;
         text-align: left;
+        margin-top: 1rem;
     }
 
     #instructions {
@@ -70,23 +107,26 @@
 <body>
 
 <div style="text-align:center">
-    <h1>Find the Shuttle</h1>
-    <div id='intro'>
-        <button id='game-new'>New game</button>
-        <button id='game-join'>Join game</button>
-        <input id='input-name' placeholder='what will you be called?'>
-        <input id='input-code' placeholder='game code'>
-        <button id='start'>Start</button>
-    </div>
     <div id='game'>
+        <div id='sidebar'>
+            <div id='code'></div>
+            <div id='players'></div>
+        </div>
+        <div id='intro'>
+            <button id='game-new'>New game</button>
+            <button id='game-join'>Join game</button>
+            <input id='input-name' placeholder='what will you be called?'>
+            <input id='input-code' placeholder='game code'>
+            <button id='start'>Start</button>
+            <div id="error"></div>
+        </div>
         <div id='gameplay'>
             <div id='player'></div>
         </div>
-        <div id='instructions'>Move with arrow keys.<br />Fear not.</div>
-        <div id='players'></div>
-        <div id='code'></div>
     </div>
-    <div id="error"></div>
+    <div id='instructions'>Move with arrow keys.<br />Fear not.</div>
+    <h1>Find the Shuttle</h1>
+    <h2>JS13k game jam : 2016</h2>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
