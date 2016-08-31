@@ -22,6 +22,9 @@ function Game(data) {
     if (data) this.updateFromData(data);
     this.init()
     this.log('game initialized')
+
+    // TODO detect this after everyone joins the game
+    this.numPlayers = 2;
 }
 
 Game.prototype = {};
@@ -90,6 +93,7 @@ function xy(x, y) {
 
 function Mine(data) {
     data = data || {};
+    this.id = data.id;
     this.words = data.words;
     this.coords = data.coords;
     this.game = data.game;
@@ -101,6 +105,7 @@ Mine.prototype = {};
 
 Mine.prototype.data = function() {
     return {
+        id: this.id,
         words: this.words,
         coords: this.coords,
         game: this.game.code,
@@ -116,8 +121,23 @@ Mine.prototype.getWord = function(i) {
     return this.words[Math.min(i, this.words.length - 1)];
 }
 
+Mine.prototype.canPlayerTrigger = function(player) {
+    var w = this.getWord();
 
-Mine.prototype.levelUp = function() {
+    // Did the player already trigger one of the words in the pbatch?
+    // (Players can only do 1 word per pbatch.)
+    if (w.pbatch && player.hasPBatch(this, w)) return false;
+
+    // ... will add other stuff here
+
+    return true;
+}
+
+
+Mine.prototype.levelUp = function(player) {
+    var prevWord = this.getWord();
+    if (prevWord.pbatch) player.addPBatch(this, prevWord);
+
     this.level += 1;
     this.render();
 }
@@ -139,7 +159,8 @@ Player.prototype.updateFromData = function(data) {
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
-    this.coords = data.coords || xy(70,70);
+    this.coords = data.coords || xy(140,40);
+    this.mineState = data.mineState || {};
 }
 
 
@@ -149,8 +170,26 @@ Player.prototype.data = function() {
         game: this.game.code,
         checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,
-        coords: this.coords
+        coords: this.coords,
+        mineState: this.mineState
     }
+}
+
+Player.prototype.getMineState = function(mine) {
+    if (!(mine.id in this.mineState)) this.mineState[mine.id] = {
+        pbatches: [],
+        // will put more things here
+    }
+    return this.mineState[mine.id];
+}
+
+Player.prototype.addPBatch = function(mine, word) {
+    console.log('Adding pbatch:', mine)
+    this.getMineState(mine).pbatches.push(word.pbatch);
+}
+
+Player.prototype.hasPBatch = function(mine, word) {
+    return (mine.id in this.mineState) && (this.mineState[mine.id].pbatches.indexOf(word.pbatch) !== -1);
 }
 // ======  shared/socket.js
 function setupSocket(socket) {

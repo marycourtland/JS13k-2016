@@ -9,6 +9,7 @@
 
 function Mine(data) {
     data = data || {};
+    this.id = data.id;
     this.words = data.words;
     this.coords = data.coords;
     this.game = data.game;
@@ -20,6 +21,7 @@ Mine.prototype = {};
 
 Mine.prototype.data = function() {
     return {
+        id: this.id,
         words: this.words,
         coords: this.coords,
         game: this.game.code,
@@ -35,8 +37,23 @@ Mine.prototype.getWord = function(i) {
     return this.words[Math.min(i, this.words.length - 1)];
 }
 
+Mine.prototype.canPlayerTrigger = function(player) {
+    var w = this.getWord();
 
-Mine.prototype.levelUp = function() {
+    // Did the player already trigger one of the words in the pbatch?
+    // (Players can only do 1 word per pbatch.)
+    if (w.pbatch && player.hasPBatch(this, w)) return false;
+
+    // ... will add other stuff here
+
+    return true;
+}
+
+
+Mine.prototype.levelUp = function(player) {
+    var prevWord = this.getWord();
+    if (prevWord.pbatch) player.addPBatch(this, prevWord);
+
     this.level += 1;
     this.render();
 }

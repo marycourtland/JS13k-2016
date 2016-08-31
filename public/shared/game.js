@@ -13,6 +13,9 @@ function Game(data) {
     if (data) this.updateFromData(data);
     this.init()
     this.log('game initialized')
+
+    // TODO detect this after everyone joins the game
+    this.numPlayers = 2;
 }
 
 Game.prototype = {};

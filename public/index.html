@@ -92,13 +92,14 @@
 
     #players, #code, #instructions {
         color: #789;
-        font-size: 12px;
+        font-size: 8px;
         line-height: 1.5em;
         text-align: left;
         margin-top: 1rem;
     }
 
     #instructions {
+        font-size: 12px;
         float: right;
         text-align: right;
     }
@@ -115,12 +116,12 @@
         <div id='intro'>
             <button id='game-new'>New game</button>
             <button id='game-join'>Join game</button>
-            <input id='input-name' placeholder='what will you be called?'>
-            <input id='input-code' placeholder='game code'>
-            <button id='start'>Start</button>
+            <input id='input-code' placeholder='game code' style='display:none;'>
+            <input id='input-name' placeholder='what will you be called?' style='display:none;'>
+            <button id='start' style='display:none;'>Start</button>
             <div id="error"></div>
         </div>
-        <div id='gameplay'>
+        <div id='gameplay' style='display:none;'>
             <div id='player'></div>
         </div>
     </div>

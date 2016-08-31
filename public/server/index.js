@@ -60,8 +60,11 @@ module.exports = function (socket) {
         // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
+            if (!payload.mine.canPlayerTrigger(payload.player)) return;
+
             payload.mine.trigger(payload.player);
-            payload.mine.levelUp();
+            payload.mine.levelUp(payload.player);
+
             payload.game.emit('update_mine', {
                 mine_index: data.mine_index,
                 mine: payload.mine.data()

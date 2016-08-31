@@ -1,5 +1,5 @@
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player({name: name, game: this, checkpoint: xy(50,50)});
+    var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
     // TODO: set player checkpoint?
     // TODO: also give players some coords 

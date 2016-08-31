@@ -25,9 +25,9 @@ g.views.showNewGame = function() {
 g.views.showJoinGame = function() {
     $('game-new').hide();
     $('game-join').hide();
-    $('input-code').show();
     $('start').show();
-    $('input-name').show().focus();
+    $('input-name').show();
+    $('input-code').show().focus();
 }
 
 // GAMEPLAY

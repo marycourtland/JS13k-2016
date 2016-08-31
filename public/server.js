@@ -1,32 +1,32 @@
 // ======  server/data.js
 // Static data for now. Maybe more procedural in the future.
 
+// Area A: outside the space station
+// Area B: inside the space station
+
+var mineData = [];
+
 var checkpoints = [
-    {
-        coords: xy(100, 100),
+    xy(200, 100),
+    xy(1300, 400),
+    xy(2600, 260)
+];
+
+for (var i = 0; i < checkpoints.length; i++) {
+    mineData.push({
+        id: 'c' + i,
+        coords: checkpoints[i],
         words: [
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: '[checkpoint]'}
+            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', trigger: 'checkpoint'},
+            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', trigger: 'checkpoint'},
+            {size:10, glitchLevel: 0, distance: 0, text: 'checkpoint\n[+][+]'}
         ]
-    },
-    {
-        coords: {x:1400,y:300},
-        words: [
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: '[checkpoint]'}
-        ]
-    },
-    {
-      coords: {x:2600,y:260},
-        words: [
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: '[checkpoint]'}
-        ]
-    },
-]
+    })
+}
     
 var landmarks = [
     {
+        id: 'l0',
         coords: {x:960,y:270},
         words: [
             {size: 36, glitchLevel:0, distance: 300, text:'an\norbiting\nmass'},
@@ -35,6 +35,7 @@ var landmarks = [
         ]
     },
     {
+        id: 'l1',
         coords: {x:2180,y:220},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
@@ -43,6 +44,7 @@ var landmarks = [
         ]
     },
     {
+        id: 'l2',
         coords: {x:2480,y:440},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
@@ -51,6 +53,7 @@ var landmarks = [
         ]
     },
     {
+        id: 'l3',
         coords: {x:2820,y:300},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
@@ -59,6 +62,7 @@ var landmarks = [
         ]
     },
     {
+        id: 'l4',
         coords: {x:3400,y:400},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a round porthole'},
@@ -67,86 +71,53 @@ var landmarks = [
         ]
     }
 ]
+mineData = mineData.concat(landmarks);
 
-var decorations = [
-    // outside the space station
-    {
-        coords: {x:120,y:280},
-        words: [
-            {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
-            {size: 14, glitchLevel:1, distance: 10,  text:'more detail'}
-        ]
-    },
-    {
-        coords: {x:280,y:360},
-        words: [
+
+// Decoration templates
+var decorations = {
+    'A': {
+        template: [
             {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
             {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
-        ]
+        ],
+        coords: [
+            {x:120,y:280},
+            {x:280,y:360},
+            {x:465,y:170},
+            {x:670,y:450},
+            {x:960,y:500},
+            {x:750,y:85},
+        ],
     },
-    {
-        coords: {x:465,y:170},
-        words: [
-            {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
-            {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
-        ]
-    },
-    {
-        coords: {x:670,y:450},
-        words: [
-            {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
-            {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
-        ]
-    },
-    {
-        coords: {x:960,y:500},
-        words: [
-            {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
-            {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
-        ]
-    },
-    {
-        coords: {x:750,y:85},
-        words: [
-            {size: 10, glitchLevel:0, distance: 100, text:'space junk'},
-            {size: 14, glitchLevel:1, distance: 10,  text:'more detail'}
-        ]
-    },
-    
-    // Inside the space station
-    {
-        coords: {x:1340,y:140},
-        words: [
+    'B': {
+        template: [
             {size: 10, glitchLevel:0, distance: 50, text:'a doodad'},
             {size: 14, glitchLevel:0, distance: 10, text:'something interesting'}
-        ]
-    },
-    {
-        coords: {x:1460,y:515},
-        words: [
-            {size: 10, glitchLevel:0, distance: 50, text:'a doodad'},
-            {size: 14, glitchLevel:0, distance: 10, text:'something interesting'}
-        ]
-    },
-    {
-        coords: {x:1690,y:410},
-        words: [
-            {size: 10, glitchLevel:0, distance: 50, text:'a doodad'},
-            {size: 14, glitchLevel:0, distance: 10, text:'something interesting'}
-        ]
-    },
-    {
-        coords: {x:1800,y:180},
-        words: [
-            {size: 10, glitchLevel:0, distance: 50, text:'a doodad'},
-            {size: 14, glitchLevel:0, distance: 10, text:'something interesting'}
+        ],
+        coords: [
+            {x:1340,y:140},
+            {x:1460,y:515},
+            {x:1690,y:410},
+            {x:1800,y:180},
         ]
     }
-]
+}
+
+for (var category in decorations) {
+    for (var i = 0; i < decorations[category].coords.length; i++) {
+        mineData.push({
+            id: 'd' + category + i,
+            coords: decorations[category].coords[i],
+            words: decorations[category].template,
+        })
+    }
+}
 
 
-var danger = [
+var glitchy = [
     {
+        id: 'g0',
         coords: xy(600, 550),
         words: [
             {size:12, glitchLevel: 0, distance: 120, text: 'a shining speck of light',},
@@ -155,6 +126,7 @@ var danger = [
         ]
     },
     {
+        id: 'g1',
         coords: {x:1950,y:490},
         words: [
             {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
@@ -163,6 +135,7 @@ var danger = [
         ]
     },
     {
+        id: 'g2',
         coords: xy(2600, 150),
         words: [
             {size:12, glitchLevel: 0, distance: 100, text: 'a plain button',},
@@ -171,12 +144,10 @@ var danger = [
         ]
     },
 ]
-
-var mineData = [];
-[checkpoints, landmarks, decorations, danger].forEach(function(category) { mineData = mineData.concat(category); });
+mineData = mineData.concat(glitchy);
 // ======  server/game.js
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player({name: name, game: this, checkpoint: xy(50,50)});
+    var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
     // TODO: set player checkpoint?
     // TODO: also give players some coords 
@@ -295,8 +266,11 @@ module.exports = function (socket) {
         // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
+            if (!payload.mine.canPlayerTrigger(payload.player)) return;
+
             payload.mine.trigger(payload.player);
-            payload.mine.levelUp();
+            payload.mine.levelUp(payload.player);
+
             payload.game.emit('update_mine', {
                 mine_index: data.mine_index,
                 mine: payload.mine.data()

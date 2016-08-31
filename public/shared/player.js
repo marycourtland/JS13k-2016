@@ -10,7 +10,8 @@ Player.prototype.updateFromData = function(data) {
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
-    this.coords = data.coords || xy(70,70);
+    this.coords = data.coords || xy(140,40);
+    this.mineState = data.mineState || {};
 }
 
 
@@ -20,6 +21,24 @@ Player.prototype.data = function() {
         game: this.game.code,
         checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,
-        coords: this.coords
+        coords: this.coords,
+        mineState: this.mineState
     }
+}
+
+Player.prototype.getMineState = function(mine) {
+    if (!(mine.id in this.mineState)) this.mineState[mine.id] = {
+        pbatches: [],
+        // will put more things here
+    }
+    return this.mineState[mine.id];
+}
+
+Player.prototype.addPBatch = function(mine, word) {
+    console.log('Adding pbatch:', mine)
+    this.getMineState(mine).pbatches.push(word.pbatch);
+}
+
+Player.prototype.hasPBatch = function(mine, word) {
+    return (mine.id in this.mineState) && (this.mineState[mine.id].pbatches.indexOf(word.pbatch) !== -1);
 }

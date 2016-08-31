@@ -19,8 +19,9 @@
     g.actions = {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
+            if (!mine.canPlayerTrigger(g.me)) return;
             console.log('Mine levelled up:', mine.getWord().text)
-            mine.levelUp();
+            mine.levelUp(g.me);
             if (!mine.getWord().singlePlayerOnly)
                 socket.emit('mine_level_up', {
                     code: g.game.code,
