@@ -16,20 +16,22 @@ for (var i = 0; i < checkpoints.length; i++) {
         id: 'c' + i,
         coords: checkpoints[i],
         words: [
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', trigger: 'checkpoint'},
-            {size:10, glitchLevel: 0, distance: 0, text: 'checkpoint\n[+][+]'}
+            {size:10, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', trigger: 'checkpoint'},
+            {size:10, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', trigger: 'checkpoint'},
+            {size:10, distance: 0, text: 'checkpoint\n[+][+]'}
         ]
     })
 }
-    
+
 var landmarks = [
     {
         id: 'l0',
         coords: {x:960,y:270},
         words: [
             {size: 36, glitchLevel:0, distance: 300, text:'an\norbiting\nmass'},
-            {size: 48, glitchLevel:0, distance: 200, text:'a mostly ruined\nspace station'},
+            {size: 48, glitchLevel:0, distance: 220, text:'a mostly ruined\nspace station', pbatch:'ss'},
+            {size: 48, glitchLevel:0, distance: 200, text:'a mostly ruined\nspace station\n[+][ ]', pbatch:'ss'},
+            {size: 48, glitchLevel:0, distance: 200, text:'a mostly ruined\nspace station\n[+][+]', pbatch:'ss'},
             {size: 50, glitchLevel:0, distance: 100, text:'one functioning port'}
         ]
     },
@@ -118,8 +120,9 @@ var glitchy = [
     {
         id: 'g0',
         coords: xy(600, 550),
+        hidden: 1,
         words: [
-            {size:12, glitchLevel: 0, distance: 120, text: 'a shining speck of light',},
+            {size:12, distance: 120, text: 'a shining speck of light',},
             {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', trigger: 'death'},
             {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', trigger: 'death'}
         ]
@@ -137,8 +140,8 @@ var glitchy = [
         id: 'g2',
         coords: xy(2600, 150),
         words: [
-            {size:12, glitchLevel: 0, distance: 100, text: 'a plain button',},
-            {size:18, glitchLevel: 0, distance: 50, text: 'it is really tempting', trigger: 'death'},
+            {size:12, distance: 100, text: 'a plain button',},
+            {size:18, distance: 50, text: 'it is really tempting', trigger: 'death'},
             {size:36, glitchLevel: 4, distance: 49, text: 'EXPLOSION', trigger: 'death'}
         ]
     },

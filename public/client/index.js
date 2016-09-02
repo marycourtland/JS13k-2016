@@ -54,12 +54,12 @@
     // direct input
     var actionClicks = {
         'game-new': function() {
-            g.views.showNewGame();
+            g.views.showStartGame();
         },
 
         'game-join': function() {
             inputs.startSignal = 'join_game';
-            g.views.showJoinGame();
+            g.views.showStartGame(true);
         },
 
         'start': function() {

@@ -47,6 +47,7 @@ Game.prototype.updateMines = function(player) {
     for (var i = 0; i < this.mines.length; i++) {
         // TODO: filter mines which are in view
         var mine = this.mines[i];
+        if (mine.hidden) continue;
         var d = distance(player.coords, mine.coords);
         if (d < mine.getWord().distance) {
             g.actions['mine-level-up'](i);
@@ -166,12 +167,12 @@ window.$ = function(id) {
     // direct input
     var actionClicks = {
         'game-new': function() {
-            g.views.showNewGame();
+            g.views.showStartGame();
         },
 
         'game-join': function() {
             inputs.startSignal = 'join_game';
-            g.views.showJoinGame();
+            g.views.showStartGame(true);
         },
 
         'start': function() {
@@ -304,12 +305,9 @@ Mine.prototype.interpolateSize = function(distance, i) {
     var prevWord = (i === 0) ? {distance: word.distance + d0} : this.getWord(i - 1);
     var nextWord = this.getWord(i+1);
 
-    var delta = prevWord.distance - word.distance;
-    var p = prevWord.distance - distance;
-    var progress = p / delta;
+    var progress = (prevWord.distance - distance) / (prevWord.distance - word.distance);
 
     return Math.max(word.size, word.size + (nextWord.size - word.size) * progress)
-    return Math.max(prevWord.size, prevWord.size + (word.size - prevWord.size) / progress);
 }
 // ======  client/player.js
 var velocity = 5;
@@ -377,27 +375,16 @@ g.views = {};
 // INTRO
 
 g.views.showIntro = function() {
-    $('gameplay').hide();
     $('sidebar').hide();
-    $('input-name').hide();
-    $('input-code').hide();
-    $('start').hide();
     $('intro').show();
 }
 
-g.views.showNewGame = function() {
+g.views.showStartGame = function(showJoin) {
     $('game-new').hide();
     $('game-join').hide();
     $('start').show();
     $('input-name').show().focus();
-}
-
-g.views.showJoinGame = function() {
-    $('game-new').hide();
-    $('game-join').hide();
-    $('start').show();
-    $('input-name').show();
-    $('input-code').show().focus();
+    if (showJoin) $('input-code').show().focus();
 }
 
 // GAMEPLAY
@@ -442,6 +429,7 @@ g.views.renderMine = function(index) {
 
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
+    if (mine.hidden) $mine.hide();
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {

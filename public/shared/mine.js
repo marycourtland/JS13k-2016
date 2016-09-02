@@ -12,6 +12,7 @@ function Mine(data) {
     this.id = data.id;
     this.words = data.words;
     this.coords = data.coords;
+    this.hidden = data.hidden || 0;
     this.game = data.game;
     this.level = data.level || 0;
     this.singlePlayerOnly = data.singlePlayerOnly || false;
@@ -24,6 +25,7 @@ Mine.prototype.data = function() {
         id: this.id,
         words: this.words,
         coords: this.coords,
+        hidden: this.hidden,
         game: this.game.code,
         level: this.level,
         singlePlayerOnly: this.singlePlayerOnly

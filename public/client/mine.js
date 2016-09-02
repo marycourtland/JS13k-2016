@@ -6,10 +6,7 @@ Mine.prototype.interpolateSize = function(distance, i) {
     var prevWord = (i === 0) ? {distance: word.distance + d0} : this.getWord(i - 1);
     var nextWord = this.getWord(i+1);
 
-    var delta = prevWord.distance - word.distance;
-    var p = prevWord.distance - distance;
-    var progress = p / delta;
+    var progress = (prevWord.distance - distance) / (prevWord.distance - word.distance);
 
     return Math.max(word.size, word.size + (nextWord.size - word.size) * progress)
-    return Math.max(prevWord.size, prevWord.size + (word.size - prevWord.size) / progress);
 }

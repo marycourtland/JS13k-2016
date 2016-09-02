@@ -7,27 +7,16 @@ g.views = {};
 // INTRO
 
 g.views.showIntro = function() {
-    $('gameplay').hide();
     $('sidebar').hide();
-    $('input-name').hide();
-    $('input-code').hide();
-    $('start').hide();
     $('intro').show();
 }
 
-g.views.showNewGame = function() {
+g.views.showStartGame = function(showJoin) {
     $('game-new').hide();
     $('game-join').hide();
     $('start').show();
     $('input-name').show().focus();
-}
-
-g.views.showJoinGame = function() {
-    $('game-new').hide();
-    $('game-join').hide();
-    $('start').show();
-    $('input-name').show();
-    $('input-code').show().focus();
+    if (showJoin) $('input-code').show().focus();
 }
 
 // GAMEPLAY
@@ -72,6 +61,7 @@ g.views.renderMine = function(index) {
 
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
+    if (mine.hidden) $mine.hide();
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {
