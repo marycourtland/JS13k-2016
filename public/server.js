@@ -8,7 +8,6 @@ var mineData = [];
 
 var checkpoints = [
     xy(200, 100),
-    xy(1300, 400),
     xy(2600, 260)
 ];
 
@@ -17,8 +16,8 @@ for (var i = 0; i < checkpoints.length; i++) {
         id: 'c' + i,
         coords: checkpoints[i],
         words: [
-            {size:10, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', trigger: 'checkpoint'},
-            {size:10, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', trigger: 'checkpoint'},
+            {size:10, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', triggers: ['checkpoint']},
+            {size:10, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', triggers: ['checkpoint']},
             {size:10, distance: 0, text: 'checkpoint\n[+][+]'}
         ]
     })
@@ -30,10 +29,10 @@ var landmarks = [
         coords: {x:960,y:270},
         words: [
             {size: 36, glitchLevel:0, distance: 300, text:'an\norbiting\nmass'},
-            {size: 48, glitchLevel:0, distance: 220, text:'a mostly ruined\nspace station', pbatch:'ss'},
-            {size: 48, glitchLevel:0, distance: 200, text:'a mostly ruined\nspace station\n[+][ ]', pbatch:'ss'},
-            {size: 48, glitchLevel:0, distance: 200, text:'a mostly ruined\nspace station\n[+][+]', pbatch:'ss'},
-            {size: 50, glitchLevel:0, distance: 100, text:'one functioning port'}
+            {size: 48, glitchLevel:0, distance: 250, text:'a mostly ruined\nspace station'},
+            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[ ][ ]', pbatch:'ss', triggers: ['checkpoint']},
+            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
+            {size: 48, glitchLevel:0, distance: 10, text:'one functioning port\n[+][+]'}
         ]
     },
     {
@@ -69,7 +68,7 @@ var landmarks = [
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a round porthole'},
             {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance'},
-            {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety', trigger: 'win'},
+            {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety', triggers: ['win']},
         ]
     }
 ]
@@ -88,8 +87,8 @@ var decorations = {
             {x:280,y:360},
             {x:465,y:170},
             {x:670,y:450},
-            {x:960,y:500},
             {x:750,y:85},
+            {x:950,y:500},
         ],
     },
     'B': {
@@ -124,8 +123,8 @@ var glitchy = [
         hidden: 1,
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', trigger: 'death'},
-            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', trigger: 'death'}
+            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['death']},
+            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', triggers: ['death']}
         ]
     },
     {
@@ -133,8 +132,8 @@ var glitchy = [
         coords: {x:1950,y:490},
         words: [
             {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
-            {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', trigger: 'death'},
-            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', trigger: 'death'},
+            {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: ['death']},
+            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death']},
         ]
     },
     {
@@ -142,12 +141,24 @@ var glitchy = [
         coords: xy(2600, 150),
         words: [
             {size:12, distance: 100, text: 'a plain button',},
-            {size:18, distance: 50, text: 'it is really tempting', trigger: 'death'},
-            {size:36, glitchLevel: 4, distance: 49, text: 'EXPLOSION', trigger: 'death'}
+            {size:18, distance: 50, text: 'it is really tempting', trigger: ['death']},
+            {size:36, glitchLevel: 4, distance: 49, text: 'EXPLOSION', trigger: ['death']}
         ]
     },
 ]
 mineData = mineData.concat(glitchy);
+
+
+// TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
+mineData.forEach(function(mine) {
+  if (mine.coords.x < 960) {
+    mine.area = 'outside';
+  }
+  else if (mine.coords.x > 960) {
+    mine.area = 'spacestation';
+    mine.hidden = 1;
+  }
+})
 // ======  server/game.js
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
@@ -174,7 +185,12 @@ Game.prototype.populate = function() {
 }
 
 Game.prototype.addMine = function(mine) {
+    mine.index = this.mines.length;
     this.mines.push(mine);
+}
+
+Game.prototype.getArea = function(area) {
+    return this.mines.filter(function(m) { return m.area === area; });
 }
 
 // TODO: change this to a single socket room
@@ -275,6 +291,7 @@ module.exports = function (socket) {
             payload.mine.levelUp(payload.player);
 
             payload.game.emit('update_mine', {
+                new: 1,
                 mine_index: data.mine_index,
                 mine: payload.mine.data()
             })
@@ -312,8 +329,11 @@ Mine.prototype.increment = function() {
 }
 
 Mine.prototype.trigger = function(player) {
-    var t = this.getWord().trigger;
-    if (t in Triggers) Triggers[t](player, this);
+    var triggerList = this.getWord().triggers || [];
+    var self = this;
+    triggerList.forEach(function(t) {
+        if (t in Triggers) Triggers[t](player, self);
+    })
 }
 // ======  server/player.js
 // TODO: ...server side settings file?
@@ -338,10 +358,20 @@ Player.prototype.die = function() {
 var Triggers = {};
 
 Triggers['death'] = function(player, mine) {
-    console.log('TRIGGERING death')
     player.die();
 }
 
 Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
 }
+
+
+var displayTriggers = ['showArea', 'hideArea'];
+displayTriggers.forEach(function(trigger) {
+    Triggers[trigger] = function(player, mine) {
+        mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
+            m.hidden = (trigger === 'hideArea');
+            mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
+        })
+    }
+})

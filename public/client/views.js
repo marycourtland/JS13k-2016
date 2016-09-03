@@ -61,7 +61,7 @@ g.views.renderMine = function(index) {
 
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
-    if (mine.hidden) $mine.hide();
+    mine.hidden ? $mine.hide() : $mine.show();
     // TODO: this is getting calculated twice - don't do that
     size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {

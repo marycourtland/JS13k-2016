@@ -23,7 +23,12 @@ Game.prototype.populate = function() {
 }
 
 Game.prototype.addMine = function(mine) {
+    mine.index = this.mines.length;
     this.mines.push(mine);
+}
+
+Game.prototype.getArea = function(area) {
+    return this.mines.filter(function(m) { return m.area === area; });
 }
 
 // TODO: change this to a single socket room

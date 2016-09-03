@@ -85,8 +85,10 @@
         },
 
         'update_mine': function(data) {
-            // expect: data.mine, data.mine_index
-            g.game.mines[data.mine_index] = new Mine(data.mine);
+            // expect: data.mine_index
+            // optional: data.new data.mine
+            if (data.new) g.game.mines[data.mine_index] = new Mine(data.mine);
+            else g.game.mines[data.mine_index].updateFromData(data.mine);
             g.views.updateMine(data.mine_index);
         },
 

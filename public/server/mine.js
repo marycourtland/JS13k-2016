@@ -3,6 +3,9 @@ Mine.prototype.increment = function() {
 }
 
 Mine.prototype.trigger = function(player) {
-    var t = this.getWord().trigger;
-    if (t in Triggers) Triggers[t](player, this);
+    var triggerList = this.getWord().triggers || [];
+    var self = this;
+    triggerList.forEach(function(t) {
+        if (t in Triggers) Triggers[t](player, self);
+    })
 }

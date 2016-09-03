@@ -9,16 +9,21 @@
 
 function Mine(data) {
     data = data || {};
+    this.updateFromData(data);
+}
+
+Mine.prototype = {};
+
+Mine.prototype.updateFromData = function(data) {
     this.id = data.id;
     this.words = data.words;
     this.coords = data.coords;
     this.hidden = data.hidden || 0;
+    this.area = data.area || '';
     this.game = data.game;
     this.level = data.level || 0;
     this.singlePlayerOnly = data.singlePlayerOnly || false;
 }
-
-Mine.prototype = {};
 
 Mine.prototype.data = function() {
     return {
@@ -26,6 +31,7 @@ Mine.prototype.data = function() {
         words: this.words,
         coords: this.coords,
         hidden: this.hidden,
+        area: this.area,
         game: this.game.code,
         level: this.level,
         singlePlayerOnly: this.singlePlayerOnly

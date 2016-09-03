@@ -66,6 +66,7 @@ module.exports = function (socket) {
             payload.mine.levelUp(payload.player);
 
             payload.game.emit('update_mine', {
+                new: 1,
                 mine_index: data.mine_index,
                 mine: payload.mine.data()
             })

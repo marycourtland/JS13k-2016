@@ -35,7 +35,6 @@ Player.prototype.getMineState = function(mine) {
 }
 
 Player.prototype.addPBatch = function(mine, word) {
-    console.log('Adding pbatch:', mine)
     this.getMineState(mine).pbatches.push(word.pbatch);
 }
 
