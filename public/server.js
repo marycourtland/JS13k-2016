@@ -28,8 +28,8 @@ var landmarks = [
         id: 'l0',
         coords: {x:960,y:270},
         words: [
-            {size: 36, glitchLevel:0, distance: 300, text:'an\norbiting\nmass'},
-            {size: 48, glitchLevel:0, distance: 250, text:'a mostly ruined\nspace station'},
+            {size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
+            {size: 48, glitchLevel:0, distance: 300, text:'a mostly ruined\nspace station'},
             {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[ ][ ]', pbatch:'ss', triggers: ['checkpoint']},
             {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
             {size: 48, glitchLevel:0, distance: 10, text:'one functioning port\n[+][+]'}
@@ -120,7 +120,6 @@ var glitchy = [
     {
         id: 'g0',
         coords: xy(600, 550),
-        hidden: 1,
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
             {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['death']},
@@ -291,7 +290,6 @@ module.exports = function (socket) {
             payload.mine.levelUp(payload.player);
 
             payload.game.emit('update_mine', {
-                new: 1,
                 mine_index: data.mine_index,
                 mine: payload.mine.data()
             })

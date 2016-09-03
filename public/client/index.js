@@ -20,6 +20,7 @@
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
+            if (mine.level === mine.words.length - 1) return; // no need
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
             if (!mine.getWord().singlePlayerOnly)
@@ -29,6 +30,7 @@
                     mine_index: i
                 })
             g.views.updateMine(i);
+            g.views.bounce($('mine-' + i));
         },
 
         'player-move-start': function(data) {
@@ -85,11 +87,16 @@
         },
 
         'update_mine': function(data) {
-            // expect: data.mine_index
-            // optional: data.new data.mine
-            if (data.new) g.game.mines[data.mine_index] = new Mine(data.mine);
-            else g.game.mines[data.mine_index].updateFromData(data.mine);
+            // expect: data.mine_index, data.mine
+
+            var mine = g.game.mines[data.mine_index];
+            var bounce = (mine.level !== data.mine.level)
+            console.log('BOUNCE?', mine.level, data.mine.level, bounce)
+
+            g.game.mines[data.mine_index].updateFromData(data.mine);
+
             g.views.updateMine(data.mine_index);
+            if (bounce) g.views.bounce($('mine-' + data.mine_index));
         },
 
         'player-move-start': function(data) {

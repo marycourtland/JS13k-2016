@@ -63,15 +63,32 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     mine.hidden ? $mine.hide() : $mine.show();
     // TODO: this is getting calculated twice - don't do that
-    size = size || word.size;
+    var size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {
         return g.glitch.transform(l, word.glitchLevel);
     })
     $mine.html(lines.join('<br/>')).css({
-        'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
     })
+    if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})
+}
+
+g.views.bounce = function($el) {
+    if ($el.bouncing) return;
+    var s = parseInt($el.style.fontSize);
+    $el.bouncing = true;
+    if ($el.className.match(/bounce/)) return;
+    $el.className += ' bounce';
+    $el.css({'fontSize': s*1.5 + 'px'}) 
+
+    setTimeout(function() {
+        $el.css({'fontSize': s + 'px'});
+        setTimeout(function() {
+            $el.className = $el.className.replace('bounce', '');
+            $el.bouncing = false;
+        }, 200)
+    }, 100)
 }
 
 

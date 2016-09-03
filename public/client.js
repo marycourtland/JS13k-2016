@@ -133,6 +133,7 @@ window.$ = function(id) {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
+            if (mine.level === mine.words.length - 1) return; // no need
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
             if (!mine.getWord().singlePlayerOnly)
@@ -142,6 +143,7 @@ window.$ = function(id) {
                     mine_index: i
                 })
             g.views.updateMine(i);
+            g.views.bounce($('mine-' + i));
         },
 
         'player-move-start': function(data) {
@@ -198,11 +200,16 @@ window.$ = function(id) {
         },
 
         'update_mine': function(data) {
-            // expect: data.mine_index
-            // optional: data.new data.mine
-            if (data.new) g.game.mines[data.mine_index] = new Mine(data.mine);
-            else g.game.mines[data.mine_index].updateFromData(data.mine);
+            // expect: data.mine_index, data.mine
+
+            var mine = g.game.mines[data.mine_index];
+            var bounce = (mine.level !== data.mine.level)
+            console.log('BOUNCE?', mine.level, data.mine.level, bounce)
+
+            g.game.mines[data.mine_index].updateFromData(data.mine);
+
             g.views.updateMine(data.mine_index);
+            if (bounce) g.views.bounce($('mine-' + data.mine_index));
         },
 
         'player-move-start': function(data) {
@@ -433,15 +440,32 @@ g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     mine.hidden ? $mine.hide() : $mine.show();
     // TODO: this is getting calculated twice - don't do that
-    size = size || word.size;
+    var size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {
         return g.glitch.transform(l, word.glitchLevel);
     })
     $mine.html(lines.join('<br/>')).css({
-        'font-size': size + 'px',
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
     })
+    if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})
+}
+
+g.views.bounce = function($el) {
+    if ($el.bouncing) return;
+    var s = parseInt($el.style.fontSize);
+    $el.bouncing = true;
+    if ($el.className.match(/bounce/)) return;
+    $el.className += ' bounce';
+    $el.css({'fontSize': s*1.5 + 'px'}) 
+
+    setTimeout(function() {
+        $el.css({'fontSize': s + 'px'});
+        setTimeout(function() {
+            $el.className = $el.className.replace('bounce', '');
+            $el.bouncing = false;
+        }, 200)
+    }, 100)
 }
 
 
