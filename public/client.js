@@ -136,12 +136,14 @@ window.$ = function(id) {
             if (mine.level === mine.words.length - 1) return; // no need
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
+
             if (!mine.getWord().singlePlayerOnly)
                 socket.emit('mine_level_up', {
                     code: g.game.code,
                     name: g.me.name,
                     mine_index: i
                 })
+
             g.views.updateMine(i);
             g.views.bounce($('mine-' + i));
         },
@@ -201,15 +203,20 @@ window.$ = function(id) {
 
         'update_mine': function(data) {
             // expect: data.mine_index, data.mine
-
             var mine = g.game.mines[data.mine_index];
-            var bounce = (mine.level !== data.mine.level)
-            console.log('BOUNCE?', mine.level, data.mine.level, bounce)
 
-            g.game.mines[data.mine_index].updateFromData(data.mine);
+            var levelledUp = (mine.level !== data.mine.level);
+            var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
 
-            g.views.updateMine(data.mine_index);
-            if (bounce) g.views.bounce($('mine-' + data.mine_index));
+            // special effect: randomly popping newly revealed mines into view
+            var delay = (revealedMine) ? Math.random( )* 1000 : 0;
+
+            setTimeout(function() {
+                g.game.mines[data.mine_index].updateFromData(data.mine);
+
+                g.views.updateMine(data.mine_index);
+                if (levelledUp || revealedMine) g.views.bounce($('mine-' + data.mine_index));
+            }, delay)
         },
 
         'player-move-start': function(data) {
@@ -439,6 +446,8 @@ g.views.renderMine = function(index) {
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
     mine.hidden ? $mine.hide() : $mine.show();
+    if (mine.hidden) return;
+
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;
     var lines = word.text.split('\n').map(function(l) {

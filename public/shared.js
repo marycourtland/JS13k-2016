@@ -122,8 +122,6 @@ Mine.prototype.data = function() {
     }
 }
 
-Mine.prototype.render = function() {}; // client will overwrite
-
 Mine.prototype.getWord = function(i) {
     if (typeof i === 'undefined') i = this.level;
     return this.words[Math.min(i, this.words.length - 1)];
@@ -147,12 +145,10 @@ Mine.prototype.levelUp = function(player) {
     if (prevWord.pbatch) player.addPBatch(this, prevWord);
 
     this.level += 1;
-    this.render();
 }
 
 Mine.prototype.levelDown = function() {
     this.level -= 1;
-    this.render();
 }
 // ======  shared/player.js
 function Player(data) {

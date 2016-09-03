@@ -27,9 +27,9 @@ var landmarks = [
         id: 'l0',
         coords: {x:960,y:270},
         words: [
-            {size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
-            {size: 48, glitchLevel:0, distance: 300, text:'a mostly ruined\nspace station'},
-            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[ ][ ]', pbatch:'ss', triggers: ['checkpoint']},
+            //{size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
+            {size: 48, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
+            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: ['checkpoint']},
             {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
             {size: 48, glitchLevel:0, distance: 10, text:'one functioning port\n[+][+]'}
         ]
