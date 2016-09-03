@@ -456,6 +456,7 @@ g.views.updateMine = function(index, size) {
     $mine.html(lines.join('<br/>')).css({
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
+        'fontWeight': (size <= 8) ? 200 : 800
     })
     if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})
 }

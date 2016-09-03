@@ -29,8 +29,8 @@ var landmarks = [
         coords: {x:960,y:270},
         words: [
             //{size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
-            {size: 48, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
-            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: ['checkpoint']},
+            {size: 24, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
+            //{size: 36, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: ['checkpoint']},
             {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
             {size: 48, glitchLevel:0, distance: 10, text:'one functioning port\n[+][+]'}
         ]
@@ -85,8 +85,8 @@ var decorations = {
         coords: [
             {x:120,y:280},
             {x:280,y:360},
-            {x:465,y:170},
-            {x:670,y:450},
+            //{x:465,y:170},
+            //{x:670,y:450},
             {x:750,y:85},
             {x:950,y:500},
         ],
@@ -148,15 +148,62 @@ var glitchy = [
 mineData = mineData.concat(glitchy);
 
 
+
+// TESTING
+
+function makeOxygen(id, area, coords) {
+    return {
+        id: ['oxygen', area, id].join('_'),
+        coords: coords,
+        hidden: 1,
+        area: area,
+        words: [
+            {size:8, distance: 50, text: 'oxygen', triggers: ['hide']},
+            {size:8, distance: 0, text: ''},
+        ]
+    }
+}
+
+function makeOxygenCannister(id, coords) {
+    // TODO: randomize the coords + number of oxygens
+    var area = 'oxygen_' + id;
+    mineData.push(makeOxygen(0, area, xy(coords.x + 60, coords.y - 100)));
+    mineData.push(makeOxygen(1, area, xy(coords.x + 30, coords.y + 50)));
+    mineData.push(makeOxygen(2, area, xy(coords.x - 70, coords.y - 50)));
+
+    mineData.push({
+        id: 'cannister_' + id,
+        coords: coords,
+        words: [
+            {size:10, distance: 150, text: 'a cannister',},
+            {size:12, distance: 50, text: 'oxygen supply', triggers: ['showArea', 'hide'], showArea: area},
+            {size:12, distance: 0, text: ''},
+        ]
+    })
+}
+
+var oxyCans = [
+    xy(470, 150),
+    xy(400, 350),
+    xy(200, 550),
+    xy(1200, 500),
+    xy(1500, 200),
+]
+
+for (var i = 0; i < oxyCans.length; i++) {
+    makeOxygenCannister('oxyCan'+i, oxyCans[i]);
+}
+
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
 mineData.forEach(function(mine) {
-  if (mine.coords.x < 960) {
-    mine.area = 'outside';
-  }
-  else if (mine.coords.x > 960) {
-    mine.area = 'spacestation';
-    mine.hidden = 1;
-  }
+    if (!!mine.area) return;
+    if (mine.coords.x < 960) {
+        mine.area = 'outside';
+    }
+    else if (mine.coords.x > 960) {
+        mine.area = 'spacestation';
+        mine.hidden = 1;
+    }
 })
 // ======  server/game.js
 Game.prototype.addPlayer = function(name, socket) {
@@ -363,11 +410,24 @@ Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
 }
 
+Triggers['hide'] = function(player, mine) {
+    if (mine.hidden) return;
+    // TODO: if any more mine.hidden code, do a mine.hide()
+    mine.hidden = 1;
+    mine.game.emit('update_mine', {mine_index: mine.index, mine: mine.data()})
+}
 
 var displayTriggers = ['showArea', 'hideArea'];
 displayTriggers.forEach(function(trigger) {
     Triggers[trigger] = function(player, mine) {
+        console.log("TRIGGER:", trigger)
+        var w = mine.getWord();
+        var words = mine.game.getArea(w[trigger]);
+        console.log('W:', w);
+        console.log(w[trigger]);
+        console.log('AREA WORDS:', words)
         mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
+            console.log('SHOW MINE:', m.id, m.index);
             m.hidden = (trigger === 'hideArea');
             mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
         })
