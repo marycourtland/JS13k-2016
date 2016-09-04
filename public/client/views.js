@@ -61,6 +61,7 @@ g.views.renderMine = function(index) {
 
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
+    if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
 

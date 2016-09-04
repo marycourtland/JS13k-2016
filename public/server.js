@@ -1,10 +1,11 @@
 // ======  server/data.js
+var templates = {};
+var mineData = [];
+
 // Static data for now. Maybe more procedural in the future.
 
 // Area A: outside the space station
 // Area B: inside the space station
-
-var mineData = [];
 
 var checkpoints = [
     xy(200, 100),
@@ -122,7 +123,16 @@ var glitchy = [
         coords: xy(600, 550),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['death']},
+            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['spawn', 'death'], spawn: {
+                template: 'debris',
+                count: 7,
+                distance: 120,
+                delay: 50,
+                pause: 00,
+                params: {
+                    id: 'g0' + Math.random()
+                }
+            }},
             {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', triggers: ['death']}
         ]
     },
@@ -132,7 +142,16 @@ var glitchy = [
         words: [
             {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
             {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: ['death']},
-            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death']},
+            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death', 'spawn'], spawn: {
+                template: 'debris',
+                count:5,
+                distance: 50,
+                delay: 150,
+                pause: 00,
+                params: {
+                    id: 'g1' + Math.random()
+                }
+            }},
         ]
     },
     {
@@ -149,34 +168,23 @@ mineData = mineData.concat(glitchy);
 
 
 
-// TESTING
-
-function makeOxygen(id, area, coords) {
-    return {
-        id: ['oxygen', area, id].join('_'),
-        coords: coords,
-        hidden: 1,
-        area: area,
-        words: [
-            {size:8, distance: 50, text: 'oxygen', triggers: ['hide']},
-            {size:8, distance: 0, text: ''},
-        ]
-    }
-}
-
 function makeOxygenCannister(id, coords) {
-    // TODO: randomize the coords + number of oxygens
-    var area = 'oxygen_' + id;
-    mineData.push(makeOxygen(0, area, xy(coords.x + 60, coords.y - 100)));
-    mineData.push(makeOxygen(1, area, xy(coords.x + 30, coords.y + 50)));
-    mineData.push(makeOxygen(2, area, xy(coords.x - 70, coords.y - 50)));
-
     mineData.push({
         id: 'cannister_' + id,
         coords: coords,
         words: [
             {size:10, distance: 150, text: 'a cannister',},
-            {size:12, distance: 50, text: 'oxygen supply', triggers: ['showArea', 'hide'], showArea: area},
+            {size:12, distance: 50, text: 'oxygen supply', triggers: ['spawn', 'hide'], spawn: {
+                template: 'oxygen',
+                count:3,
+                distance: 50,
+                delay: 100,
+                pause: 00,
+                params: {
+                    id: id
+                    // coords will be filled in
+                }
+            }},
             {size:12, distance: 0, text: ''},
         ]
     })
@@ -192,6 +200,30 @@ var oxyCans = [
 
 for (var i = 0; i < oxyCans.length; i++) {
     makeOxygenCannister('oxyCan'+i, oxyCans[i]);
+}
+
+
+// TEMPLATES
+templates.oxygen = function (params) {
+    return {
+        id: 'oxy' + params.id,
+        coords: params.coords,
+        words: [
+            {size:8, distance: 30, text: 'oxygen', triggers: ['hide']},
+            {size:8, distance: 0, text: ''},
+        ]
+    }
+}
+
+templates.debris = function (params) {
+    return {
+        id: 'debris' + params.id,
+        coords: params.coords,
+        words: [
+            {size:8, glitchLevel: 2, distance: 30, text: 'debris', triggers: ['death']},
+            {size:8, glitchLevel: 2, distance: 0, text: 'debris'},
+        ]
+    }
 }
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
@@ -232,7 +264,9 @@ Game.prototype.populate = function() {
 
 Game.prototype.addMine = function(mine) {
     mine.index = this.mines.length;
+    mine.game = this;
     this.mines.push(mine);
+    return this;
 }
 
 Game.prototype.getArea = function(area) {
@@ -246,6 +280,7 @@ Game.prototype.emit = function(signal, data, options) {
     this.players.forEach(function(player) {
         player.socket.emit(signal, data);
     })
+    return this;
 }
 
 // UNUSED
@@ -420,16 +455,31 @@ Triggers['hide'] = function(player, mine) {
 var displayTriggers = ['showArea', 'hideArea'];
 displayTriggers.forEach(function(trigger) {
     Triggers[trigger] = function(player, mine) {
-        console.log("TRIGGER:", trigger)
-        var w = mine.getWord();
-        var words = mine.game.getArea(w[trigger]);
-        console.log('W:', w);
-        console.log(w[trigger]);
-        console.log('AREA WORDS:', words)
         mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
-            console.log('SHOW MINE:', m.id, m.index);
             m.hidden = (trigger === 'hideArea');
             mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
         })
     }
 })
+
+Triggers['spawn'] = function(player, mine) {
+    // TODO: infinite spawning (count=-1)
+    var spawnData = mine.getWord().spawn;
+
+    var angles = range(0, 2*Math.PI, 2*Math.PI/spawnData.count);
+    // TODO: shuffle angles first so that it looks more random?
+
+    for (var i = 0; i < angles.length; i++) {
+        spawnData.params.coords = V.add(mine.coords, V.rth(spawnData.distance, angles[i]));
+        var spawnedMine = new Mine(templates[spawnData.template](spawnData.params))
+
+        spawnedMine.area = spawnedMine.area || mine.area;
+
+        mine.game.addMine(spawnedMine).emit('update_mine', {
+            new: 1, 
+            delay: spawnData.delay + i * spawnData.pause,
+            mine_index: spawnedMine.index,
+            mine: spawnedMine.data()
+        })
+    }
+}

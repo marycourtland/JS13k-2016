@@ -18,16 +18,31 @@ Triggers['hide'] = function(player, mine) {
 var displayTriggers = ['showArea', 'hideArea'];
 displayTriggers.forEach(function(trigger) {
     Triggers[trigger] = function(player, mine) {
-        console.log("TRIGGER:", trigger)
-        var w = mine.getWord();
-        var words = mine.game.getArea(w[trigger]);
-        console.log('W:', w);
-        console.log(w[trigger]);
-        console.log('AREA WORDS:', words)
         mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
-            console.log('SHOW MINE:', m.id, m.index);
             m.hidden = (trigger === 'hideArea');
             mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
         })
     }
 })
+
+Triggers['spawn'] = function(player, mine) {
+    // TODO: infinite spawning (count=-1)
+    var spawnData = mine.getWord().spawn;
+
+    var angles = range(0, 2*Math.PI, 2*Math.PI/spawnData.count);
+    // TODO: shuffle angles first so that it looks more random?
+
+    for (var i = 0; i < angles.length; i++) {
+        spawnData.params.coords = V.add(mine.coords, V.rth(spawnData.distance, angles[i]));
+        var spawnedMine = new Mine(templates[spawnData.template](spawnData.params))
+
+        spawnedMine.area = spawnedMine.area || mine.area;
+
+        mine.game.addMine(spawnedMine).emit('update_mine', {
+            new: 1, 
+            delay: spawnData.delay + i * spawnData.pause,
+            mine_index: spawnedMine.index,
+            mine: spawnedMine.data()
+        })
+    }
+}

@@ -5,7 +5,7 @@ var game_stages = {
 }
 
 function Game(data) {
-    this.code = Math.round(Math.random() * 1e4).toString();
+    this.code = randInt(1e4).toString();
     this.players = [];
     this.mines = [];
     this.checkpoints = []; // locations where players can save the game

@@ -82,7 +82,7 @@ g.glitch.transform = function(text, level) {
 
 // TODO: is this elsewhere in the codebase? D:
 var choice = function(array) {
-    var i = Math.floor(Math.random() * array.length);
+    var i = randInt(array.length);
     return array[i];
 }
 // ======  client/html-utils.js
@@ -133,7 +133,7 @@ window.$ = function(id) {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
-            if (mine.level === mine.words.length - 1) return; // no need
+            //if (mine.level === mine.words.length - 1) return; // no need
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
 
@@ -203,18 +203,22 @@ window.$ = function(id) {
 
         'update_mine': function(data) {
             // expect: data.mine_index, data.mine
+            var makeNew = data.new;
+            if (makeNew) g.game.mines[data.mine_index] = new Mine(data.mine);
             var mine = g.game.mines[data.mine_index];
 
             var levelledUp = (mine.level !== data.mine.level);
             var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
 
             // special effect: randomly popping newly revealed mines into view
-            var delay = (revealedMine) ? Math.random( )* 1000 : 0;
+            var delay = typeof data.delay === 'number' ? data.delay : (revealedMine) ? randFloat(1000) : 0;
+
+            mine.hidden = 1; // argh. make sure that player movement doesn't trigger a redraw
 
             setTimeout(function() {
                 g.game.mines[data.mine_index].updateFromData(data.mine);
 
-                g.views.updateMine(data.mine_index);
+                g.views[makeNew ? 'renderMine' : 'updateMine'](data.mine_index);
                 if (levelledUp || revealedMine) g.views.bounce($('mine-' + data.mine_index));
             }, delay)
         },
@@ -445,6 +449,7 @@ g.views.renderMine = function(index) {
 
 g.views.updateMine = function(index, size) {
     var $mine = $('mine-' + index), mine = g.game.mines[index], word = mine.getWord()
+    if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
 

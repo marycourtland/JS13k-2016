@@ -1,9 +1,10 @@
+var templates = {};
+var mineData = [];
+
 // Static data for now. Maybe more procedural in the future.
 
 // Area A: outside the space station
 // Area B: inside the space station
-
-var mineData = [];
 
 var checkpoints = [
     xy(200, 100),
@@ -121,7 +122,16 @@ var glitchy = [
         coords: xy(600, 550),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['death']},
+            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['spawn', 'death'], spawn: {
+                template: 'debris',
+                count: 7,
+                distance: 120,
+                delay: 50,
+                pause: 00,
+                params: {
+                    id: 'g0' + Math.random()
+                }
+            }},
             {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', triggers: ['death']}
         ]
     },
@@ -131,7 +141,16 @@ var glitchy = [
         words: [
             {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
             {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: ['death']},
-            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death']},
+            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death', 'spawn'], spawn: {
+                template: 'debris',
+                count:5,
+                distance: 50,
+                delay: 150,
+                pause: 00,
+                params: {
+                    id: 'g1' + Math.random()
+                }
+            }},
         ]
     },
     {
@@ -148,34 +167,23 @@ mineData = mineData.concat(glitchy);
 
 
 
-// TESTING
-
-function makeOxygen(id, area, coords) {
-    return {
-        id: ['oxygen', area, id].join('_'),
-        coords: coords,
-        hidden: 1,
-        area: area,
-        words: [
-            {size:8, distance: 50, text: 'oxygen', triggers: ['hide']},
-            {size:8, distance: 0, text: ''},
-        ]
-    }
-}
-
 function makeOxygenCannister(id, coords) {
-    // TODO: randomize the coords + number of oxygens
-    var area = 'oxygen_' + id;
-    mineData.push(makeOxygen(0, area, xy(coords.x + 60, coords.y - 100)));
-    mineData.push(makeOxygen(1, area, xy(coords.x + 30, coords.y + 50)));
-    mineData.push(makeOxygen(2, area, xy(coords.x - 70, coords.y - 50)));
-
     mineData.push({
         id: 'cannister_' + id,
         coords: coords,
         words: [
             {size:10, distance: 150, text: 'a cannister',},
-            {size:12, distance: 50, text: 'oxygen supply', triggers: ['showArea', 'hide'], showArea: area},
+            {size:12, distance: 50, text: 'oxygen supply', triggers: ['spawn', 'hide'], spawn: {
+                template: 'oxygen',
+                count:3,
+                distance: 50,
+                delay: 100,
+                pause: 00,
+                params: {
+                    id: id
+                    // coords will be filled in
+                }
+            }},
             {size:12, distance: 0, text: ''},
         ]
     })
@@ -191,6 +199,30 @@ var oxyCans = [
 
 for (var i = 0; i < oxyCans.length; i++) {
     makeOxygenCannister('oxyCan'+i, oxyCans[i]);
+}
+
+
+// TEMPLATES
+templates.oxygen = function (params) {
+    return {
+        id: 'oxy' + params.id,
+        coords: params.coords,
+        words: [
+            {size:8, distance: 30, text: 'oxygen', triggers: ['hide']},
+            {size:8, distance: 0, text: ''},
+        ]
+    }
+}
+
+templates.debris = function (params) {
+    return {
+        id: 'debris' + params.id,
+        coords: params.coords,
+        words: [
+            {size:8, glitchLevel: 2, distance: 30, text: 'debris', triggers: ['death']},
+            {size:8, glitchLevel: 2, distance: 0, text: 'debris'},
+        ]
+    }
 }
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)

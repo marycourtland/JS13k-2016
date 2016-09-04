@@ -20,6 +20,6 @@ g.glitch.transform = function(text, level) {
 
 // TODO: is this elsewhere in the codebase? D:
 var choice = function(array) {
-    var i = Math.floor(Math.random() * array.length);
+    var i = randInt(array.length);
     return array[i];
 }

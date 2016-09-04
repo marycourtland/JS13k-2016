@@ -24,7 +24,9 @@ Game.prototype.populate = function() {
 
 Game.prototype.addMine = function(mine) {
     mine.index = this.mines.length;
+    mine.game = this;
     this.mines.push(mine);
+    return this;
 }
 
 Game.prototype.getArea = function(area) {
@@ -38,6 +40,7 @@ Game.prototype.emit = function(signal, data, options) {
     this.players.forEach(function(player) {
         player.socket.emit(signal, data);
     })
+    return this;
 }
 
 // UNUSED
