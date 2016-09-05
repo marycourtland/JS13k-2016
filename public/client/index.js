@@ -67,6 +67,7 @@
                 // TODO: aggregate the listening for game updates
                 var newbie = new Player({name: data.name, game: g.game});
                 g.game.players.push(newbie);
+                g.views.renderSidebar();
                 g.views.renderPlayer(newbie);
             }
         },
@@ -130,7 +131,6 @@
     // direct input
     var actionClicks = {
         'game-new': function() {
-            console.log('yay!')
             g.views.showStartGame();
         },
 
@@ -170,10 +170,7 @@
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {
-            var e = $(actionId);
-            console.log("E:", actionId, e)
-            $(actionId);
-            e.bind('click', actionClicks[actionId]);
+            $(actionId).bind('click', actionClicks[actionId]);
         }
         initSocket();
     }

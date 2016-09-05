@@ -59,7 +59,6 @@
         position: absolute;
         overflow: hidden;
         background: rgba(19, 29, 45, 0.95);
-        padding: 5px;
         width: 150px;
         height: 600px;
         top: 0;
@@ -112,7 +111,7 @@
 
 
 
-    .font, button, input, .mine, .player {
+    .font, button, input, .mine, .player, #footer > * {
         text-transform: uppercase;
         transform: scaleY(1.4);
         letter-spacing: 0.05em;
@@ -128,7 +127,7 @@
     #footer {
         background: #2C3B4D;
         border-top: 2px solid #95B6AC;
-        height: 300px;
+        transform: scale(1);
     }
 
         h1, h2 {
@@ -166,7 +165,7 @@
         <button id='start' style='display:none;'>Start</button>
         <div id="error"></div>
     </div>
-    <div id='footer' class='font'>
+    <div id='footer' >
         <div id='instructions'>Move with arrow keys.<br />Fear not.</div>
         <h1>Find the Shuttle</h1>
         <h2>JS13k game jam : 2016</h2>

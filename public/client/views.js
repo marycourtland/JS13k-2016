@@ -28,9 +28,7 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('code').text("game " + g.game.code);
-
-    g.game.players.forEach(g.views.renderSidebarPlayer);
+    g.views.renderSidebar();
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
@@ -41,6 +39,12 @@ g.views.renderGame = function() {
     g.game.players.forEach(function(player) {
         g.views.renderPlayer(player);
     })
+}
+
+g.views.renderSidebar = function() {
+    $('code').text("game " + g.game.code);
+    $('players').html('');
+    g.game.players.forEach(g.views.renderSidebarPlayer);
 }
 
 g.views.renderSidebarPlayer = function(player) {

@@ -180,6 +180,7 @@ window.$ = function(id) {
                 // TODO: aggregate the listening for game updates
                 var newbie = new Player({name: data.name, game: g.game});
                 g.game.players.push(newbie);
+                g.views.renderSidebar();
                 g.views.renderPlayer(newbie);
             }
         },
@@ -243,7 +244,6 @@ window.$ = function(id) {
     // direct input
     var actionClicks = {
         'game-new': function() {
-            console.log('yay!')
             g.views.showStartGame();
         },
 
@@ -283,10 +283,7 @@ window.$ = function(id) {
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {
-            var e = $(actionId);
-            console.log("E:", actionId, e)
-            $(actionId);
-            e.bind('click', actionClicks[actionId]);
+            $(actionId).bind('click', actionClicks[actionId]);
         }
         initSocket();
     }
@@ -420,9 +417,7 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('code').text("game " + g.game.code);
-
-    g.game.players.forEach(g.views.renderSidebarPlayer);
+    g.views.renderSidebar();
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
@@ -433,6 +428,12 @@ g.views.renderGame = function() {
     g.game.players.forEach(function(player) {
         g.views.renderPlayer(player);
     })
+}
+
+g.views.renderSidebar = function() {
+    $('code').text("game " + g.game.code);
+    $('players').html('');
+    g.game.players.forEach(g.views.renderSidebarPlayer);
 }
 
 g.views.renderSidebarPlayer = function(player) {
