@@ -8,9 +8,18 @@ var mineData = [];
 // Area B: inside the space station
 
 var checkpoints = [
-    xy(200, 100),
+    xy(250, 150),
     xy(2600, 260)
 ];
+
+
+var oxyCans = [
+    xy(200, 550),
+    xy(1200, 500),
+    xy(1600, 250),
+    xy(2200, 75)
+]
+
 
 for (var i = 0; i < checkpoints.length; i++) {
     mineData.push({
@@ -33,7 +42,7 @@ var landmarks = [
             {size: 24, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
             //{size: 36, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: ['checkpoint']},
             {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
-            {size: 48, glitchLevel:0, distance: 10, text:'one functioning port\n[+][+]'}
+            {size: 48, glitchLevel:0, distance: 10, text:'inside the\nspace station'}
         ]
     },
     {
@@ -50,7 +59,7 @@ var landmarks = [
         coords: {x:2480,y:440},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control'},
+            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: ['lifeSupportOn']},
             {size: 28, glitchLevel:0, distance: 30, text:'life support\n powered up'},
         ]
     },
@@ -68,8 +77,8 @@ var landmarks = [
         coords: {x:3400,y:400},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a round porthole'},
-            {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance'},
-            {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety', triggers: ['win']},
+            {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance', triggers: ['win']},
+            {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety'},
         ]
     }
 ]
@@ -120,7 +129,7 @@ for (var category in decorations) {
 var glitchy = [
     {
         id: 'g0',
-        coords: xy(600, 550),
+        coords: xy(450, 350),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
             {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['spawn', 'death'], spawn: {
@@ -189,14 +198,6 @@ function makeOxygenCannister(id, coords) {
         ]
     })
 }
-
-var oxyCans = [
-    xy(470, 150),
-    xy(400, 350),
-    xy(200, 550),
-    xy(1200, 500),
-    xy(1500, 200),
-]
 
 for (var i = 0; i < oxyCans.length; i++) {
     makeOxygenCannister('oxyCan'+i, oxyCans[i]);
@@ -326,7 +327,7 @@ Game.prototype.lose = function() {
         self.emit('game-over', {
             reason: 'Someone ran out of oxygen.'
         })
-    }, 5000)
+    }, 2000)
 }
 
 
@@ -535,4 +536,14 @@ Triggers['spawn'] = function(player, mine) {
 
 Triggers['win'] = function(player, mine) {
     player.game.win();
+}
+
+
+// Systems
+
+Triggers['lifeSupportOn'] = function(player, mine) {
+    player.game.drainOxygen = 0;
+    player.game.eachPlayer(function(p) {
+        p.drainOxygen(-(1 - p.oxygen))
+    })
 }

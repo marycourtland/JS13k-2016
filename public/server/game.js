@@ -86,7 +86,7 @@ Game.prototype.lose = function() {
         self.emit('game-over', {
             reason: 'Someone ran out of oxygen.'
         })
-    }, 5000)
+    }, 2000)
 }
 
 

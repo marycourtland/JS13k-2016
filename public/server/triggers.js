@@ -54,3 +54,13 @@ Triggers['spawn'] = function(player, mine) {
 Triggers['win'] = function(player, mine) {
     player.game.win();
 }
+
+
+// Systems
+
+Triggers['lifeSupportOn'] = function(player, mine) {
+    player.game.drainOxygen = 0;
+    player.game.eachPlayer(function(p) {
+        p.drainOxygen(-(1 - p.oxygen))
+    })
+}

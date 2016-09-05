@@ -187,7 +187,7 @@
     <div id='footer' >
         <div id='instructions'>Move with arrow keys.<br />Fear not.</div>
         <h1>Find the Shuttle</h1>
-        <h2>JS13k game jam : 2016</h2>
+        <h2>Mary Bush : JS13k game jam : 2016</h2>
     </div>
 </div>
 
@@ -201,27 +201,6 @@
 <script src="/shared.js"></script>
 <script src="/client.js"></script>
 
-<script>
-    // TEMPORARY FOR DEVELOPMENT ONLY. New mine template :)
-    $('gameplay').bind('click', function(e) {
-        var coords = JSON.stringify(xy(
-            e.clientX - e.target.offsetLeft,
-            e.clientY - e.target.offsetTop
-        )).replace(/"/g, '');
-
-        var lines = [
-            "{",
-            "    coords: " + coords + ",",
-            "    words: [",
-            "        {size: 10, glitchLevel:0, distance: 100, text:'word1'},",
-            "        {size: 10, glitchLevel:0, distance: 100, text:'word2'},",
-            "        {size: 10, glitchLevel:0, distance: 100, text:'word3'},",
-            "    ]",
-            "}"
-        ];
-        console.log(lines.join('\n'));
-    });
-</script>
 
 </body>
 </html>
