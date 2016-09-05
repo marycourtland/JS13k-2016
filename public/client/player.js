@@ -14,8 +14,8 @@ Player.prototype.move = function(dir) {
 }
 
 Player.prototype.checkMargin = function() {
-    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width - g.settings.margin));
-    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.settings.margin));
+    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width * (1 - g.settings.marginR)));
+    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.bbox.width * g.settings.marginL));
     var margin = margin1 || margin2;
     if (margin !== 0) g.views.moveFrame(margin);
 }

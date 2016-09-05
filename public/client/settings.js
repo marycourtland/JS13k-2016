@@ -1,3 +1,4 @@
 g.settings = {};
 
-g.settings.margin = 300; // px
+g.settings.marginR = 0.4; // percent of view
+g.settings.marginL = 0.2;

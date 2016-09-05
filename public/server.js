@@ -156,7 +156,7 @@ var glitchy = [
                 count:5,
                 distance: 50,
                 delay: 150,
-                pause: 00,
+                pause: 0,
                 params: {
                     id: 'g1' + Math.random()
                 }
