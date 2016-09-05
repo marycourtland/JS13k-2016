@@ -26,8 +26,8 @@ for (var i = 0; i < checkpoints.length; i++) {
         id: 'c' + i,
         coords: checkpoints[i],
         words: [
-            {size:10, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', triggers: ['checkpoint']},
-            {size:10, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', triggers: ['checkpoint']},
+            {size:10, distance: 50, text: 'checkpoint\n[ ][ ]', pbatch:'cp', triggers: {'checkpoint': 1}},
+            {size:10, distance: 50, text: 'checkpoint\n[+][ ]', pbatch:'cp', triggers: {'checkpoint': 1}},
             {size:10, distance: 0, text: 'checkpoint\n[+][+]'}
         ]
     })
@@ -40,8 +40,12 @@ var landmarks = [
         words: [
             //{size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
             {size: 24, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
-            //{size: 36, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: ['checkpoint']},
-            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: ['checkpoint', 'showArea', 'hideArea'], showArea: 'spacestation', hideArea: 'outside'},
+            //{size: 36, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: {'checkpoint': 1}},
+            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
+              'checkpoint': 1,
+              'showArea': 'spacestation',
+              'hideArea': 'outside'
+            }},
             {size: 48, glitchLevel:0, distance: 10, text:'inside the\nspace station'}
         ]
     },
@@ -59,7 +63,7 @@ var landmarks = [
         coords: {x:2480,y:440},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: ['lifeSupportOn']},
+            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1}},
             {size: 28, glitchLevel:0, distance: 30, text:'life support\n powered up'},
         ]
     },
@@ -77,7 +81,7 @@ var landmarks = [
         coords: {x:3400,y:400},
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a round porthole'},
-            {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance', triggers: ['win']},
+            {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance', triggers: {'win': 1}},
             {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety'},
         ]
     }
@@ -132,7 +136,8 @@ var glitchy = [
         coords: xy(450, 350),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
-            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: ['spawn', 'death'], spawn: {
+            {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: {
+              'spawn':{
                 template: 'debris',
                 count: 7,
                 distance: 120,
@@ -141,8 +146,10 @@ var glitchy = [
                 params: {
                     id: 'g0' + Math.random()
                 }
+              },
+              'death':1
             }},
-            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', triggers: ['death']}
+            {size:36, glitchLevel: 5, distance: 50, text: 'EXPLOSION', triggers: {'death': 1} }
         ]
     },
     {
@@ -150,8 +157,10 @@ var glitchy = [
         coords: {x:1950,y:490},
         words: [
             {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
-            {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: ['death']},
-            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: ['death', 'spawn'], spawn: {
+            {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: {'death': 1}},
+            {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: {
+              'death': 1,
+              'spawn': {
                 template: 'debris',
                 count:5,
                 distance: 50,
@@ -160,7 +169,8 @@ var glitchy = [
                 params: {
                     id: 'g1' + Math.random()
                 }
-            }},
+              }
+            }}
         ]
     },
     {
@@ -168,8 +178,8 @@ var glitchy = [
         coords: xy(2600, 150),
         words: [
             {size:12, distance: 100, text: 'a plain button',},
-            {size:18, distance: 50, text: 'it is really tempting', trigger: ['death']},
-            {size:36, glitchLevel: 4, distance: 49, text: 'EXPLOSION', trigger: ['death']}
+            {size:18, distance: 50, text: 'it is really tempting', trigger: {'death': 1}},
+            {size:36, glitchLevel: 4, distance: 49, text: 'EXPLOSION', trigger: {'death': 1}}
         ]
     },
 ]
@@ -183,7 +193,8 @@ function makeOxygenCannister(id, coords) {
         coords: coords,
         words: [
             {size:10, distance: 150, text: 'a cannister',},
-            {size:12, distance: 50, text: 'oxygen supply', triggers: ['spawn', 'hide'], spawn: {
+            {size:12, distance: 50, text: 'oxygen supply', triggers: {
+              'spawn': {
                 template: 'oxygen',
                 count:3,
                 distance: 50,
@@ -193,6 +204,8 @@ function makeOxygenCannister(id, coords) {
                     id: id
                     // coords will be filled in
                 }
+              },
+              'hide': 1
             }},
             {size:12, distance: 0, text: ''},
         ]
@@ -210,7 +223,7 @@ templates.oxygen = function (params) {
         id: 'oxy' + params.id,
         coords: params.coords,
         words: [
-            {size:8, distance: 30, text: 'oxygen', triggers: ['oxygen', 'hide'], oxygen: 0.2},
+            {size:8, distance: 30, text: 'oxygen', triggers: {'oxygen': 0.2, 'hide': 1} },
             {size:8, distance: 0, text: ''},
         ]
     }
@@ -221,7 +234,7 @@ templates.debris = function (params) {
         id: 'debris' + params.id,
         coords: params.coords,
         words: [
-            {size:8, glitchLevel: 2, distance: 30, text: 'debris', triggers: ['death']},
+            {size:8, glitchLevel: 2, distance: 30, text: 'debris', triggers: {'death': 1}},
             {size:8, glitchLevel: 2, distance: 0, text: 'debris'},
         ]
     }
@@ -441,11 +454,10 @@ Mine.prototype.increment = function() {
 }
 
 Mine.prototype.trigger = function(player) {
-    var triggerList = this.getWord().triggers || [];
-    var self = this;
-    triggerList.forEach(function(t) {
-        if (t in Triggers) Triggers[t](player, self);
-    })
+    var triggerList = this.getWord().triggers || {}; 
+    for (var t in triggerList) {
+        if (t in Triggers) Triggers[t](player, this, triggerList[t]);
+    }
 }
 // ======  server/player.js
 // TODO: ...server side settings file?
@@ -491,8 +503,8 @@ Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
 }
 
-Triggers['oxygen'] = function(player, mine) {
-    player.drainOxygen(-mine.getWord().oxygen);
+Triggers['oxygen'] = function(player, mine, amount) {
+    player.drainOxygen(-amount);
 }
 
 Triggers['hide'] = function(player, mine) {
@@ -504,17 +516,16 @@ Triggers['hide'] = function(player, mine) {
 
 var displayTriggers = ['showArea', 'hideArea'];
 displayTriggers.forEach(function(trigger) {
-    Triggers[trigger] = function(player, mine) {
-        mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
+    Triggers[trigger] = function(player, mine, area) {
+        mine.game.getArea(area).forEach(function(m) {
             m.hidden = (trigger === 'hideArea');
             mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
         })
     }
 })
 
-Triggers['spawn'] = function(player, mine) {
+Triggers['spawn'] = function(player, mine, spawnData) {
     // TODO: infinite spawning (count=-1)
-    var spawnData = mine.getWord().spawn;
 
     var angles = range(0, 2*Math.PI, 2*Math.PI/spawnData.count);
     // TODO: shuffle angles first so that it looks more random?

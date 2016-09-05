@@ -8,8 +8,8 @@ Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
 }
 
-Triggers['oxygen'] = function(player, mine) {
-    player.drainOxygen(-mine.getWord().oxygen);
+Triggers['oxygen'] = function(player, mine, amount) {
+    player.drainOxygen(-amount);
 }
 
 Triggers['hide'] = function(player, mine) {
@@ -21,17 +21,16 @@ Triggers['hide'] = function(player, mine) {
 
 var displayTriggers = ['showArea', 'hideArea'];
 displayTriggers.forEach(function(trigger) {
-    Triggers[trigger] = function(player, mine) {
-        mine.game.getArea(mine.getWord()[trigger]).forEach(function(m) {
+    Triggers[trigger] = function(player, mine, area) {
+        mine.game.getArea(area).forEach(function(m) {
             m.hidden = (trigger === 'hideArea');
             mine.game.emit('update_mine', {mine_index: m.index, mine: m.data()})
         })
     }
 })
 
-Triggers['spawn'] = function(player, mine) {
+Triggers['spawn'] = function(player, mine, spawnData) {
     // TODO: infinite spawning (count=-1)
-    var spawnData = mine.getWord().spawn;
 
     var angles = range(0, 2*Math.PI, 2*Math.PI/spawnData.count);
     // TODO: shuffle angles first so that it looks more random?
