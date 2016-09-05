@@ -12,6 +12,7 @@ Player.prototype.updateFromData = function(data) {
     this.glitchLevel = data.glitchLevel || 0;
     this.coords = data.coords || xy(140,40);
     this.mineState = data.mineState || {};
+    this.oxygen = (typeof data.oxygen === 'number') ? data.oxygen : 1;
 }
 
 
@@ -22,7 +23,8 @@ Player.prototype.data = function() {
         checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,
         coords: this.coords,
-        mineState: this.mineState
+        mineState: this.mineState,
+        oxygen: this.oxygen
     }
 }
 

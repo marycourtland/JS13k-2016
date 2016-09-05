@@ -168,23 +168,6 @@ window.$ = function(id) {
     }
 
 
-    // direct input
-    var actionClicks = {
-        'game-new': function() {
-            g.views.showStartGame();
-        },
-
-        'game-join': function() {
-            inputs.startSignal = 'join_game';
-            g.views.showStartGame(true);
-        },
-
-        'start': function() {
-            ['name', 'code'].forEach(pullInput);
-            socket.emit(inputs.startSignal, inputs);
-        }
-    }
-
     // signals from server
     var listeners = {
         'player_joined': function(data) {
@@ -257,6 +240,24 @@ window.$ = function(id) {
         }
     }
 
+    // direct input
+    var actionClicks = {
+        'game-new': function() {
+            console.log('yay!')
+            g.views.showStartGame();
+        },
+
+        'game-join': function() {
+            inputs.startSignal = 'join_game';
+            g.views.showStartGame(true);
+        },
+
+        'start': function() {
+            ['name', 'code'].forEach(pullInput);
+            socket.emit(inputs.startSignal, inputs);
+        }
+    }
+
     function initGame(data) {
         g.game = new Game(JSON.parse(data.game));
         g.me = g.game.getPlayer(data.name);
@@ -282,7 +283,10 @@ window.$ = function(id) {
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {
-            $(actionId).bind('click', actionClicks[actionId]);
+            var e = $(actionId);
+            console.log("E:", actionId, e)
+            $(actionId);
+            e.bind('click', actionClicks[actionId]);
         }
         initSocket();
     }
@@ -416,8 +420,9 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('players').html("team:<br>@" + _.mapProp(g.game.players, 'name').join('<br>@'));
-    $('code').text("game code: " + g.game.code);
+    $('code').text("game " + g.game.code);
+
+    g.game.players.forEach(g.views.renderSidebarPlayer);
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
@@ -428,6 +433,20 @@ g.views.renderGame = function() {
     g.game.players.forEach(function(player) {
         g.views.renderPlayer(player);
     })
+}
+
+g.views.renderSidebarPlayer = function(player) {
+    var container = $('players');
+
+    var p = $($('player-sidebar-template').cloneNode(true));
+    p.html(p.innerHTML.replace(/\$name/g, player.name)).show();
+    p.id = '';
+    $('players').appendChild(p);
+}
+
+g.views.updateSidebarPlayer = function(player) {
+    $('pi-glitches-' + player.name).text('Glitches: ' + player.glitchLevel)
+    $('pi-oxy-' + player.name).css({width: Math.ceil(player.oxygen * 100) + '%'})
 }
 
 g.views.moveFrame = function(distance) {

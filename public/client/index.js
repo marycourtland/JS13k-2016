@@ -55,23 +55,6 @@
     }
 
 
-    // direct input
-    var actionClicks = {
-        'game-new': function() {
-            g.views.showStartGame();
-        },
-
-        'game-join': function() {
-            inputs.startSignal = 'join_game';
-            g.views.showStartGame(true);
-        },
-
-        'start': function() {
-            ['name', 'code'].forEach(pullInput);
-            socket.emit(inputs.startSignal, inputs);
-        }
-    }
-
     // signals from server
     var listeners = {
         'player_joined': function(data) {
@@ -144,6 +127,24 @@
         }
     }
 
+    // direct input
+    var actionClicks = {
+        'game-new': function() {
+            console.log('yay!')
+            g.views.showStartGame();
+        },
+
+        'game-join': function() {
+            inputs.startSignal = 'join_game';
+            g.views.showStartGame(true);
+        },
+
+        'start': function() {
+            ['name', 'code'].forEach(pullInput);
+            socket.emit(inputs.startSignal, inputs);
+        }
+    }
+
     function initGame(data) {
         g.game = new Game(JSON.parse(data.game));
         g.me = g.game.getPlayer(data.name);
@@ -169,7 +170,10 @@
         g.views.showIntro();
         socket = io({ upgrade: false, transports: ["websocket"] });
         for (var actionId in actionClicks) {
-            $(actionId).bind('click', actionClicks[actionId]);
+            var e = $(actionId);
+            console.log("E:", actionId, e)
+            $(actionId);
+            e.bind('click', actionClicks[actionId]);
         }
         initSocket();
     }

@@ -84,8 +84,8 @@ var decorations = {
             {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
         ],
         coords: [
-            {x:120,y:280},
-            {x:280,y:360},
+            //{x:120,y:280},
+            //{x:280,y:360},
             //{x:465,y:170},
             //{x:670,y:450},
             {x:750,y:85},

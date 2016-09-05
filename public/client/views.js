@@ -28,8 +28,9 @@ g.views.showGame = function() {
 }
 
 g.views.renderGame = function() {
-    $('players').html("team:<br>@" + _.mapProp(g.game.players, 'name').join('<br>@'));
-    $('code').text("game code: " + g.game.code);
+    $('code').text("game " + g.game.code);
+
+    g.game.players.forEach(g.views.renderSidebarPlayer);
 
     // Render mines
     for (var i = 0; i < g.game.mines.length; i++) {
@@ -40,6 +41,20 @@ g.views.renderGame = function() {
     g.game.players.forEach(function(player) {
         g.views.renderPlayer(player);
     })
+}
+
+g.views.renderSidebarPlayer = function(player) {
+    var container = $('players');
+
+    var p = $($('player-sidebar-template').cloneNode(true));
+    p.html(p.innerHTML.replace(/\$name/g, player.name)).show();
+    p.id = '';
+    $('players').appendChild(p);
+}
+
+g.views.updateSidebarPlayer = function(player) {
+    $('pi-glitches-' + player.name).text('Glitches: ' + player.glitchLevel)
+    $('pi-oxy-' + player.name).css({width: Math.ceil(player.oxygen * 100) + '%'})
 }
 
 g.views.moveFrame = function(distance) {
