@@ -104,13 +104,12 @@
                 g.game.getPlayer(data.name).stopMove(data.move_id);
         },
 
-        'player-update-coords': function(data) {
-            if (data.name !== g.me.name)
-                socket.emit('player-update-coords', {
-                    code: g.game.code,
-                    name: g.me.name,
-                    coords: g.me.coords
-                })
+        'player-update': function(data) {
+            // TODO `crunch: could be optimized with player-joined
+            // and also die
+            var p = g.game.getPlayer(data.name);
+            p.updateFromData(data.player);
+            g.views.updatePlayer(p);
         },
 
         'checkpoint': function(data) {
@@ -125,6 +124,10 @@
                 console.log('DEAD') 
             }
             g.views.updatePlayer(player);
+        },
+
+        'game-over': function(data) {
+            g.views.showGameOver(data);
         }
     }
 

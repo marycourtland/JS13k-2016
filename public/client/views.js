@@ -36,7 +36,7 @@ g.views.renderGame = function() {
     }
 
     // Render player
-    g.game.players.forEach(function(player) {
+    g.game.eachPlayer(function(player) {
         g.views.renderPlayer(player);
     })
 }
@@ -44,7 +44,7 @@ g.views.renderGame = function() {
 g.views.renderSidebar = function() {
     $('code').text("game " + g.game.code);
     $('players').html('');
-    g.game.players.forEach(g.views.renderSidebarPlayer);
+    g.game.eachPlayer(g.views.renderSidebarPlayer);
 }
 
 g.views.renderSidebarPlayer = function(player) {
@@ -133,4 +133,16 @@ g.views.updatePlayer = function(player) {
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })
+
+    // TODO `crunch: I think this is getting called overly much
+    g.views.updateSidebarPlayer(player);
+}
+
+
+// game state
+
+g.views.showGameOver = function(data) {
+    var gameover = g.glitch.transform('game over', 10)
+    $('game-overlay').css({opacity: 1}); // using opacity instead of show for the transition effect
+    $('game-msg').html("- " + gameover + " -<br />" + data.reason);
 }

@@ -1,3 +1,6 @@
+// TODO: ...server side settings file?
+var tickTimeout = 5000; // ms
+
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
@@ -37,26 +40,51 @@ Game.prototype.getArea = function(area) {
 Game.prototype.emit = function(signal, data, options) {
     options = options || {};
     if (!data.game) data.game = this.serialize();
-    this.players.forEach(function(player) {
+    this.eachPlayer(function(player) {
         player.socket.emit(signal, data);
     })
     return this;
 }
 
-// UNUSED
-Game.prototype.getRoom = function() { return 'game_' + this.code; }
-
 
 Game.prototype.start = function() {
+    var self = this;
+    self.stage = game_stages.gameplay;
+    setTimeout(function() { self.tick(); }, tickTimeout);
+}
 
+// ticks happen at macroscopic intervals (like ~5 seconds)
+Game.prototype.tick = function() {
+    var self = this;
+    if (self.stage !== game_stages.gameplay) return;
+
+    if (self.drainOxygen) {
+        self.eachPlayer(function(player) {
+            player.drainOxygen();
+        })
+    }
+
+    setTimeout(function() { self.tick(); }, tickTimeout)
 }
 
 Game.prototype.win = function() {
-
+    this.stage = game_stages.ending;
+    this.emit('game-over', {
+        reason: 'You have found the shuttle!' 
+    })
 }
 
 Game.prototype.lose = function() {
+    var self = this;
+    self.stage = game_stages.ending;
 
+    // Why the timeout? Because it gives the players a moment to see
+    // what happened in the game space
+    setTimeout(function() {
+        self.emit('game-over', {
+            reason: 'Someone ran out of oxygen.'
+        })
+    }, 5000)
 }
 
 

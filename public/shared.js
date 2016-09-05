@@ -25,6 +25,9 @@ function Game(data) {
 
     // TODO detect this after everyone joins the game
     this.numPlayers = 2;
+
+    // GAMEPLAY
+    this.drainOxygen = 1;
 }
 
 Game.prototype = {};
@@ -61,6 +64,12 @@ Game.prototype.data = function() {
 Game.prototype.serialize = function() {
     var d = this.data();
     return JSON.stringify(this.data());
+}
+
+// PLAYERS
+Game.prototype.eachPlayer = function(callback) {
+    var self = this;
+    self.players.forEach(function(p) { callback.call(self, p); })
 }
 
 

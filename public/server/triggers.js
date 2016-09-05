@@ -46,3 +46,7 @@ Triggers['spawn'] = function(player, mine) {
         })
     }
 }
+
+Triggers['win'] = function(player, mine) {
+    player.game.win();
+}

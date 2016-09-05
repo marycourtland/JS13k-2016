@@ -217,13 +217,12 @@ window.$ = function(id) {
                 g.game.getPlayer(data.name).stopMove(data.move_id);
         },
 
-        'player-update-coords': function(data) {
-            if (data.name !== g.me.name)
-                socket.emit('player-update-coords', {
-                    code: g.game.code,
-                    name: g.me.name,
-                    coords: g.me.coords
-                })
+        'player-update': function(data) {
+            // TODO `crunch: could be optimized with player-joined
+            // and also die
+            var p = g.game.getPlayer(data.name);
+            p.updateFromData(data.player);
+            g.views.updatePlayer(p);
         },
 
         'checkpoint': function(data) {
@@ -238,6 +237,10 @@ window.$ = function(id) {
                 console.log('DEAD') 
             }
             g.views.updatePlayer(player);
+        },
+
+        'game-over': function(data) {
+            g.views.showGameOver(data);
         }
     }
 
@@ -425,7 +428,7 @@ g.views.renderGame = function() {
     }
 
     // Render player
-    g.game.players.forEach(function(player) {
+    g.game.eachPlayer(function(player) {
         g.views.renderPlayer(player);
     })
 }
@@ -433,7 +436,7 @@ g.views.renderGame = function() {
 g.views.renderSidebar = function() {
     $('code').text("game " + g.game.code);
     $('players').html('');
-    g.game.players.forEach(g.views.renderSidebarPlayer);
+    g.game.eachPlayer(g.views.renderSidebarPlayer);
 }
 
 g.views.renderSidebarPlayer = function(player) {
@@ -522,4 +525,16 @@ g.views.updatePlayer = function(player) {
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })
+
+    // TODO `crunch: I think this is getting called overly much
+    g.views.updateSidebarPlayer(player);
+}
+
+
+// game state
+
+g.views.showGameOver = function(data) {
+    var gameover = g.glitch.transform('game over', 10)
+    $('game-overlay').css({opacity: 1}); // using opacity instead of show for the transition effect
+    $('game-msg').html("- " + gameover + " -<br />" + data.reason);
 }

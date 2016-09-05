@@ -238,6 +238,9 @@ mineData.forEach(function(mine) {
     }
 })
 // ======  server/game.js
+// TODO: ...server side settings file?
+var tickTimeout = 5000; // ms
+
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
@@ -277,26 +280,51 @@ Game.prototype.getArea = function(area) {
 Game.prototype.emit = function(signal, data, options) {
     options = options || {};
     if (!data.game) data.game = this.serialize();
-    this.players.forEach(function(player) {
+    this.eachPlayer(function(player) {
         player.socket.emit(signal, data);
     })
     return this;
 }
 
-// UNUSED
-Game.prototype.getRoom = function() { return 'game_' + this.code; }
-
 
 Game.prototype.start = function() {
+    var self = this;
+    self.stage = game_stages.gameplay;
+    setTimeout(function() { self.tick(); }, tickTimeout);
+}
 
+// ticks happen at macroscopic intervals (like ~5 seconds)
+Game.prototype.tick = function() {
+    var self = this;
+    if (self.stage !== game_stages.gameplay) return;
+
+    if (self.drainOxygen) {
+        self.eachPlayer(function(player) {
+            player.drainOxygen();
+        })
+    }
+
+    setTimeout(function() { self.tick(); }, tickTimeout)
 }
 
 Game.prototype.win = function() {
-
+    this.stage = game_stages.ending;
+    this.emit('game-over', {
+        reason: 'You have found the shuttle!' 
+    })
 }
 
 Game.prototype.lose = function() {
+    var self = this;
+    self.stage = game_stages.ending;
 
+    // Why the timeout? Because it gives the players a moment to see
+    // what happened in the game space
+    setTimeout(function() {
+        self.emit('game-over', {
+            reason: 'Someone ran out of oxygen.'
+        })
+    }, 5000)
 }
 
 
@@ -352,6 +380,8 @@ module.exports = function (socket) {
         games[game.code] = game;
         game.populate();
         game.addPlayer(payload.name, socket);
+
+        game.start();
     })
 
     socket.bind("join_game", function(data) {
@@ -381,6 +411,8 @@ module.exports = function (socket) {
     socket.bind("player-update-coords", function(data) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
+        
+        // TODO: broadcast player coords to everyone. Maybe in the tick function
     })
 
 
@@ -400,9 +432,6 @@ module.exports = function (socket) {
     })
 };
 
-function debugGame() {
-    console.log('GAME:', games[Object.keys(games)[0]].serialize())
-}
 // ======  server/mine.js
 Mine.prototype.increment = function() {
    this.stage += 1; 
@@ -418,6 +447,7 @@ Mine.prototype.trigger = function(player) {
 // ======  server/player.js
 // TODO: ...server side settings file?
 var glitchPerDeath = 0.5;
+var oxygenDrain = 0.05; // player will die in 20 ticks
 
 Player.prototype.setCheckpoint = function(coords) {
     this.checkpoint = coords;
@@ -426,6 +456,14 @@ Player.prototype.setCheckpoint = function(coords) {
     })
 }
 
+Player.prototype.drainOxygen = function() {
+    this.oxygen -= oxygenDrain;
+    this.game.emit('player-update', {name: this.name, player: this.data()})
+    if (this.oxygen <= 0) this.reallyDie();
+
+}
+
+
 Player.prototype.die = function() {
     this.coords = this.checkpoint;
     this.glitchLevel += glitchPerDeath;
@@ -433,6 +471,11 @@ Player.prototype.die = function() {
         name: this.name,
         player: this.data()
     });
+}
+
+Player.prototype.reallyDie = function() {
+    // Died from oxygen.
+    this.game.lose();
 }
 // ======  server/triggers.js
 var Triggers = {};
@@ -482,4 +525,8 @@ Triggers['spawn'] = function(player, mine) {
             mine: spawnedMine.data()
         })
     }
+}
+
+Triggers['win'] = function(player, mine) {
+    player.game.win();
 }

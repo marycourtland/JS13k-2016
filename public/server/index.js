@@ -46,6 +46,8 @@ module.exports = function (socket) {
         games[game.code] = game;
         game.populate();
         game.addPlayer(payload.name, socket);
+
+        game.start();
     })
 
     socket.bind("join_game", function(data) {
@@ -75,6 +77,8 @@ module.exports = function (socket) {
     socket.bind("player-update-coords", function(data) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
+        
+        // TODO: broadcast player coords to everyone. Maybe in the tick function
     })
 
 
@@ -94,6 +98,3 @@ module.exports = function (socket) {
     })
 };
 
-function debugGame() {
-    console.log('GAME:', games[Object.keys(games)[0]].serialize())
-}
