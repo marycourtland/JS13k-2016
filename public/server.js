@@ -209,7 +209,7 @@ templates.oxygen = function (params) {
         id: 'oxy' + params.id,
         coords: params.coords,
         words: [
-            {size:8, distance: 30, text: 'oxygen', triggers: ['hide']},
+            {size:8, distance: 30, text: 'oxygen', triggers: ['oxygen', 'hide'], oxygen: 0.2},
             {size:8, distance: 0, text: ''},
         ]
     }
@@ -240,6 +240,8 @@ mineData.forEach(function(mine) {
 // ======  server/game.js
 // TODO: ...server side settings file?
 var tickTimeout = 5000; // ms
+var oxygenDrain = 0.05; // player will die in 20 ticks
+
 
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
@@ -300,7 +302,7 @@ Game.prototype.tick = function() {
 
     if (self.drainOxygen) {
         self.eachPlayer(function(player) {
-            player.drainOxygen();
+            player.drainOxygen(oxygenDrain);
         })
     }
 
@@ -446,7 +448,7 @@ Mine.prototype.trigger = function(player) {
 }
 // ======  server/player.js
 // TODO: ...server side settings file?
-var glitchPerDeath = 0.5;
+var glitchPerDeath = 1;
 var oxygenDrain = 0.05; // player will die in 20 ticks
 
 Player.prototype.setCheckpoint = function(coords) {
@@ -456,8 +458,8 @@ Player.prototype.setCheckpoint = function(coords) {
     })
 }
 
-Player.prototype.drainOxygen = function() {
-    this.oxygen -= oxygenDrain;
+Player.prototype.drainOxygen = function(amt) {
+    this.oxygen = clamp(this.oxygen - amt, 0, 1);
     this.game.emit('player-update', {name: this.name, player: this.data()})
     if (this.oxygen <= 0) this.reallyDie();
 
@@ -486,6 +488,10 @@ Triggers['death'] = function(player, mine) {
 
 Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
+}
+
+Triggers['oxygen'] = function(player, mine) {
+    player.drainOxygen(-mine.getWord().oxygen);
 }
 
 Triggers['hide'] = function(player, mine) {

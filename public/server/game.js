@@ -1,5 +1,7 @@
 // TODO: ...server side settings file?
 var tickTimeout = 5000; // ms
+var oxygenDrain = 0.05; // player will die in 20 ticks
+
 
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
@@ -60,7 +62,7 @@ Game.prototype.tick = function() {
 
     if (self.drainOxygen) {
         self.eachPlayer(function(player) {
-            player.drainOxygen();
+            player.drainOxygen(oxygenDrain);
         })
     }
 

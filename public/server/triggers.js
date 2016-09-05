@@ -8,6 +8,10 @@ Triggers['checkpoint'] = function(player, mine) {
     player.setCheckpoint(mine.coords);
 }
 
+Triggers['oxygen'] = function(player, mine) {
+    player.drainOxygen(-mine.getWord().oxygen);
+}
+
 Triggers['hide'] = function(player, mine) {
     if (mine.hidden) return;
     // TODO: if any more mine.hidden code, do a mine.hide()

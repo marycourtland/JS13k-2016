@@ -92,6 +92,7 @@ var sin = Math.sin;
 var sqrt = Math.sqrt;
 var random = Math.random;
 
+
 function randFloat(min, max) {
     if (typeof max === 'undefined') {
         max = min;
@@ -103,6 +104,10 @@ function randFloat(min, max) {
 
 function randInt(min, max) { // inclusive
     return Math.floor(randFloat(min, max));
+}
+
+function clamp(n, min, max) {
+    return Math.max(Math.min(n, max), min);
 }
 
 function range(min, max, step) {

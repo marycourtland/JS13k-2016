@@ -208,7 +208,7 @@ templates.oxygen = function (params) {
         id: 'oxy' + params.id,
         coords: params.coords,
         words: [
-            {size:8, distance: 30, text: 'oxygen', triggers: ['hide']},
+            {size:8, distance: 30, text: 'oxygen', triggers: ['oxygen', 'hide'], oxygen: 0.2},
             {size:8, distance: 0, text: ''},
         ]
     }

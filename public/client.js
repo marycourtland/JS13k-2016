@@ -221,6 +221,12 @@ window.$ = function(id) {
             // TODO `crunch: could be optimized with player-joined
             // and also die
             var p = g.game.getPlayer(data.name);
+
+            // Client holds the master copy of the coords.
+            // Living dangerously, woohoo!
+            // TODO: ......improvement needed.
+            data.player.coords = g.game.getPlayer(data.name).coords;
+
             p.updateFromData(data.player);
             g.views.updatePlayer(p);
         },

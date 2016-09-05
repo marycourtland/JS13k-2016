@@ -1,5 +1,5 @@
 // TODO: ...server side settings file?
-var glitchPerDeath = 0.5;
+var glitchPerDeath = 1;
 var oxygenDrain = 0.05; // player will die in 20 ticks
 
 Player.prototype.setCheckpoint = function(coords) {
@@ -9,8 +9,8 @@ Player.prototype.setCheckpoint = function(coords) {
     })
 }
 
-Player.prototype.drainOxygen = function() {
-    this.oxygen -= oxygenDrain;
+Player.prototype.drainOxygen = function(amt) {
+    this.oxygen = clamp(this.oxygen - amt, 0, 1);
     this.game.emit('player-update', {name: this.name, player: this.data()})
     if (this.oxygen <= 0) this.reallyDie();
 
