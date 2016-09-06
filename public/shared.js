@@ -87,6 +87,7 @@ Game.prototype.log = function(text) {
 // ======  shared/index.js
 // ======  shared/math.js
 // TODO `crunch: see if these are actually being used a lot
+// Also see about Math.min Math.max
 var cos = Math.cos;
 var sin = Math.sin;
 var sqrt = Math.sqrt;
@@ -121,10 +122,22 @@ function xy(x, y) {
     return {x:x, y:y};
 }
 
+function absMin(a, b) {
+    return (Math.abs(a) < Math.abs(b)) ? a : b;
+}
+
+function sign(a) {
+    return Math.abs(a) / a;
+}
+
 var V = {};
 
 V.add = function(p1, p2) {
     return xy(p1.x + p2.x, p1.y + p2.y);
+}
+
+V.subtract = function(p1, p2) {
+    return xy(p1.x - p2.x, p1.y - p2.y);
 }
 
 V.rth = function(r, theta) {
@@ -133,7 +146,6 @@ V.rth = function(r, theta) {
         r * sin(theta)
     )
 }
-
 
 // ======  shared/mine.js
 // Each word data looks like:

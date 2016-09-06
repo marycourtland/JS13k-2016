@@ -138,10 +138,10 @@ g.views.updatePlayer = function(player) {
     player.wires.forEach(function(p2name) {
         // sort names to avoid duplicates
         var id = 'pwire_' + [player.name, p2name].sort().join('_')
-        g.views.addWire(id, [
+        g.views.addWire(id, 
             player.coords,
             g.game.getPlayer(p2name).coords
-        ])
+        )
     })
 
 
@@ -162,15 +162,45 @@ g.views.showGameOver = function(data) {
 // temporary wire lines. These will be improved
 g.views.wires = {}; 
 
-g.views.addWire = function(id, coordList) {
+g.views.addWire = function(id, coordsA, coordsB) {
+    // sort them...
+    // `TODO `CRUNCH maybe optimize this ???
+    var sX = (coordsB.x - coordsA.x); 
+    var sY = (coordsB.y - coordsA.y); 
+    if ((sX<0 && sY<0)
+        || (sX<0 && sY>0 && sY > Math.abs(sX))
+        || (sX>0 && sY<0 && sX > Math.abs(sY))
+    ) {
+        var _coordsB = coordsB;
+        coordsB = coordsA;
+        coordsA = _coordsB;
+    }
+
+    var total = V.subtract(coordsB, coordsA);
+    var d = absMin(total.x, total.y);
+    var v2 = xy(d * sign(total.x), d * sign(total.y));
+
+    var v1 = V.subtract(total, v2);
+    v1.x /= 2;
+    v1.y /= 2;
+
+    var coordList = [coordsA];
+    coordList.push(V.add(coordsA, v1));
+    coordList.push(V.add(coordList[1], v2));
+    coordList.push(V.add(coordList[2], v1));
+
+    var pathHtml = g.views.makeLine(id, coordList);
+    g.views.wires[id] = pathHtml;
+    g.views.renderWires();
+    return pathHtml;
+}
+
+g.views.makeLine = function(id, coordList) {
     var pathString = 'M' + coordList.map(function(coords) { return coords.x + ' ' + coords.y; }).join(' L ');
 
     // SVG is finnicky. Have to set the inner html.
     //var pathString = "M" + [coords1.x, coords1.y, 'L', coords2.x, coords2.y, 'Z'].join(' ');
-    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="2" stroke="white" fill="transparent"></path>';
-
-    g.views.wires[id] = pathHtml;
-    g.views.renderWires();
+    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="3" stroke="white" opacity="0.1" fill="transparent"></path>';
 
     return pathHtml;
 }
