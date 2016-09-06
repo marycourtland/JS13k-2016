@@ -16,6 +16,10 @@ function vivify(data, socket) {
         if ('name' in data) {
             data.player = data.game.getPlayer(data.name);
         }
+
+        if ('name2' in data) {
+            data.player2 = data.game.getPlayer(data.name2);
+        }
     }
 
     if (data.coords) {
@@ -78,9 +82,26 @@ module.exports = function (socket) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
         
-        // TODO: broadcast player coords to everyone. Maybe in the tick function
+        // TODO: broadcast player coords to everyone, for nice position syncing. Maybe in the tick function
     })
 
+    socket.bind("player-meet", function(data) {
+        var payload = vivify(data, socket);
+        var p1 = payload.player;
+        var p2 = payload.player2;
+
+        if (data.snapWire) {
+            p1.removeWire(p2);
+            p2.removeWire(p1);
+            return;
+        }
+
+        // Debounce if lots of these signals get spammed at once
+        if (p1.hasWireTo(p2)) return;
+
+        p1.addWireTo(p2);
+        p2.addWireTo(p1);
+    })
 
 
     // "Forwarding" signals: send the same event to all players in the game

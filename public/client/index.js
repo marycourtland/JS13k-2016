@@ -51,6 +51,25 @@
                 name: g.me.name,
                 coords: g.me.coords
             })
+        },
+
+        'player-meet': function(player2, snapWire) {
+            // TODO: this is not always erasing the wire. Probably because of multiple
+            // signals overriding the first signal. Please fix.
+            if (snapWire) {
+                 g.views.removeWire('pwire_' + [g.me.name, player2.name].sort().join('_'));
+            }
+
+            socket.emit('player-meet', {
+                code: g.game.code,
+                name: g.me.name,
+                name2: player2.name,
+                snapWire: snapWire
+            })
+
+
+            // NOTE: in the snapWire case, the players aren't meeting.
+            // Just reusing this code for that.
         }
     }
 
@@ -108,6 +127,8 @@
             // TODO `crunch: could be optimized with player-joined
             // and also die
             var p = g.game.getPlayer(data.name);
+
+            if (p.wires.length > 0) console.log('Player update wires:', p.name, p.wires)
 
             // Client holds the master copy of the coords.
             // Living dangerously, woohoo!

@@ -10,6 +10,12 @@ window.$ = function(id) {
         for (var prop in css) $el.style[prop] = css[prop];
         return this;
     }
+    $el.attrs = function(attrs) {
+        for (var prop in attrs) $el.setAttribute(prop, attrs[prop]);
+        return this;
+    }
+
+
     $el.hide = function() { $el.css({display: 'none' }); return this; }
     $el.show = function() { $el.css({display: ''}); return this;  }
 

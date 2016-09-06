@@ -252,11 +252,6 @@ mineData.forEach(function(mine) {
     }
 })
 // ======  server/game.js
-// TODO: ...server side settings file?
-var tickTimeout = 5000; // ms
-var oxygenDrain = 0.05; // player will die in 20 ticks
-
-
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
@@ -292,6 +287,7 @@ Game.prototype.getArea = function(area) {
     return this.mines.filter(function(m) { return m.area === area; });
 }
 
+
 // TODO: change this to a single socket room
 Game.prototype.emit = function(signal, data, options) {
     options = options || {};
@@ -306,7 +302,7 @@ Game.prototype.emit = function(signal, data, options) {
 Game.prototype.start = function() {
     var self = this;
     self.stage = game_stages.gameplay;
-    setTimeout(function() { self.tick(); }, tickTimeout);
+    setTimeout(function() { self.tick(); }, Settings.tickTimeout);
 }
 
 // ticks happen at macroscopic intervals (like ~5 seconds)
@@ -316,11 +312,11 @@ Game.prototype.tick = function() {
 
     if (self.drainOxygen) {
         self.eachPlayer(function(player) {
-            player.drainOxygen(oxygenDrain);
+            player.drainOxygen(Settings.oxygenDrain);
         })
     }
 
-    setTimeout(function() { self.tick(); }, tickTimeout)
+    setTimeout(function() { self.tick(); }, Settings.tickTimeout)
 }
 
 Game.prototype.win = function() {
@@ -365,6 +361,10 @@ function vivify(data, socket) {
 
         if ('name' in data) {
             data.player = data.game.getPlayer(data.name);
+        }
+
+        if ('name2' in data) {
+            data.player2 = data.game.getPlayer(data.name2);
         }
     }
 
@@ -428,9 +428,26 @@ module.exports = function (socket) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
         
-        // TODO: broadcast player coords to everyone. Maybe in the tick function
+        // TODO: broadcast player coords to everyone, for nice position syncing. Maybe in the tick function
     })
 
+    socket.bind("player-meet", function(data) {
+        var payload = vivify(data, socket);
+        var p1 = payload.player;
+        var p2 = payload.player2;
+
+        if (data.snapWire) {
+            p1.removeWire(p2);
+            p2.removeWire(p1);
+            return;
+        }
+
+        // Debounce if lots of these signals get spammed at once
+        if (p1.hasWireTo(p2)) return;
+
+        p1.addWireTo(p2);
+        p2.addWireTo(p1);
+    })
 
 
     // "Forwarding" signals: send the same event to all players in the game
@@ -460,9 +477,9 @@ Mine.prototype.trigger = function(player) {
     }
 }
 // ======  server/player.js
-// TODO: ...server side settings file?
-var glitchPerDeath = 1;
-var oxygenDrain = 0.05; // player will die in 20 ticks
+Player.prototype.emitUpdate = function() {
+    this.game.emit('player-update', {name: this.name, player: this.data()})
+}
 
 Player.prototype.setCheckpoint = function(coords) {
     this.checkpoint = coords;
@@ -471,17 +488,29 @@ Player.prototype.setCheckpoint = function(coords) {
     })
 }
 
+Player.prototype.addWireTo = function(player2) {
+    if (this.hasWireTo(player2)) return;
+    this.wires.push(player2.name);
+    this.emitUpdate();
+}
+
+Player.prototype.removeWire = function(player2) {
+    if (!this.hasWireTo(player2)) return;
+    this.wires.splice(this.wires.indexOf(player2.name), 1)
+    this.emitUpdate();
+}
+
+
 Player.prototype.drainOxygen = function(amt) {
     this.oxygen = clamp(this.oxygen - amt, 0, 1);
-    this.game.emit('player-update', {name: this.name, player: this.data()})
+    this.emitUpdate();
     if (this.oxygen <= 0) this.reallyDie();
-
 }
 
 
 Player.prototype.die = function() {
     this.coords = this.checkpoint;
-    this.glitchLevel += glitchPerDeath;
+    this.glitchLevel += Settings.glitchPerDeath;
     this.game.emit('die', {
         name: this.name,
         player: this.data()

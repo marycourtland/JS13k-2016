@@ -13,6 +13,7 @@ Player.prototype.updateFromData = function(data) {
     this.coords = data.coords || xy(140,40);
     this.mineState = data.mineState || {};
     this.oxygen = (typeof data.oxygen === 'number') ? data.oxygen : 1;
+    this.wires = data.wires || [];
 }
 
 
@@ -24,7 +25,8 @@ Player.prototype.data = function() {
         glitchLevel: this.glitchLevel,
         coords: this.coords,
         mineState: this.mineState,
-        oxygen: this.oxygen
+        oxygen: this.oxygen,
+        wires: this.wires
     }
 }
 
@@ -43,3 +45,8 @@ Player.prototype.addPBatch = function(mine, word) {
 Player.prototype.hasPBatch = function(mine, word) {
     return (mine.id in this.mineState) && (this.mineState[mine.id].pbatches.indexOf(word.pbatch) !== -1);
 }
+
+Player.prototype.hasWireTo = function(player2) {
+    return this.wires.indexOf(player2.name) !== -1;
+}
+

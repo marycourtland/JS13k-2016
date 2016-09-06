@@ -1,8 +1,3 @@
-// TODO: ...server side settings file?
-var tickTimeout = 5000; // ms
-var oxygenDrain = 0.05; // player will die in 20 ticks
-
-
 Game.prototype.addPlayer = function(name, socket) {
     var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
     newbie.socket = socket;
@@ -38,6 +33,7 @@ Game.prototype.getArea = function(area) {
     return this.mines.filter(function(m) { return m.area === area; });
 }
 
+
 // TODO: change this to a single socket room
 Game.prototype.emit = function(signal, data, options) {
     options = options || {};
@@ -52,7 +48,7 @@ Game.prototype.emit = function(signal, data, options) {
 Game.prototype.start = function() {
     var self = this;
     self.stage = game_stages.gameplay;
-    setTimeout(function() { self.tick(); }, tickTimeout);
+    setTimeout(function() { self.tick(); }, Settings.tickTimeout);
 }
 
 // ticks happen at macroscopic intervals (like ~5 seconds)
@@ -62,11 +58,11 @@ Game.prototype.tick = function() {
 
     if (self.drainOxygen) {
         self.eachPlayer(function(player) {
-            player.drainOxygen(oxygenDrain);
+            player.drainOxygen(Settings.oxygenDrain);
         })
     }
 
-    setTimeout(function() { self.tick(); }, tickTimeout)
+    setTimeout(function() { self.tick(); }, Settings.tickTimeout)
 }
 
 Game.prototype.win = function() {

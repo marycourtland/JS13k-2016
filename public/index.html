@@ -47,6 +47,14 @@
         text-align: center;
     }
 
+        #game svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
     #intro, #game-overlay {
         position: absolute;
         top: 0;
@@ -165,6 +173,7 @@
 
 <div id="container">
     <div id='game'>
+        <svg id='wires' xmlns="http://www.w3.org/2000/svg"></svg>
         <div id='gameplay' style='display:none;'>
             <div id='player'></div>
         </div>

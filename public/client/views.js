@@ -133,6 +133,17 @@ g.views.updatePlayer = function(player) {
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })
+    
+    // render wires. 
+    player.wires.forEach(function(p2name) {
+        // sort names to avoid duplicates
+        var id = 'pwire_' + [player.name, p2name].sort().join('_')
+        g.views.addWire(id, [
+            player.coords,
+            g.game.getPlayer(p2name).coords
+        ])
+    })
+
 
     // TODO `crunch: I think this is getting called overly much
     g.views.updateSidebarPlayer(player);
@@ -146,3 +157,32 @@ g.views.showGameOver = function(data) {
     $('game-overlay').css({opacity: 1}); // using opacity instead of show for the transition effect
     $('game-msg').html("- " + gameover + " -<br />" + data.reason);
 }
+
+// svg stuff
+// temporary wire lines. These will be improved
+g.views.wires = {}; 
+
+g.views.addWire = function(id, coordList) {
+    var pathString = 'M' + coordList.map(function(coords) { return coords.x + ' ' + coords.y; }).join(' L ');
+
+    // SVG is finnicky. Have to set the inner html.
+    //var pathString = "M" + [coords1.x, coords1.y, 'L', coords2.x, coords2.y, 'Z'].join(' ');
+    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="2" stroke="white" fill="transparent"></path>';
+
+    g.views.wires[id] = pathHtml;
+    g.views.renderWires();
+
+    return pathHtml;
+}
+
+g.views.removeWire = function(id) {
+    console.log('Deleting id:', id)
+    delete g.views.wires[id];
+    g.views.renderWires();
+}
+
+g.views.renderWires = function() {
+    // `crunch this is rather verbose for what it is doing.
+    $('wires').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
+}
+

@@ -22,7 +22,9 @@ Mine.prototype.updateFromData = function(data) {
     this.area = data.area || '';
     this.game = data.game;
     this.level = data.level || 0;
-    this.singlePlayerOnly = data.singlePlayerOnly || false;
+    this.singlePlayerOnly = data.singlePlayerOnly || 0;
+    this.wires = data.wires || [];
+    this.wirable = data.wirable || 0;
 }
 
 Mine.prototype.data = function() {
@@ -34,7 +36,9 @@ Mine.prototype.data = function() {
         area: this.area,
         game: this.game.code,
         level: this.level,
-        singlePlayerOnly: this.singlePlayerOnly
+        singlePlayerOnly: this.singlePlayerOnly,
+        wirable: this.wirable,
+        wires: this.wires
     }
 }
 

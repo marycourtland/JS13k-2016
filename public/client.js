@@ -98,6 +98,12 @@ window.$ = function(id) {
         for (var prop in css) $el.style[prop] = css[prop];
         return this;
     }
+    $el.attrs = function(attrs) {
+        for (var prop in attrs) $el.setAttribute(prop, attrs[prop]);
+        return this;
+    }
+
+
     $el.hide = function() { $el.css({display: 'none' }); return this; }
     $el.show = function() { $el.css({display: ''}); return this;  }
 
@@ -164,6 +170,25 @@ window.$ = function(id) {
                 name: g.me.name,
                 coords: g.me.coords
             })
+        },
+
+        'player-meet': function(player2, snapWire) {
+            // TODO: this is not always erasing the wire. Probably because of multiple
+            // signals overriding the first signal. Please fix.
+            if (snapWire) {
+                 g.views.removeWire('pwire_' + [g.me.name, player2.name].sort().join('_'));
+            }
+
+            socket.emit('player-meet', {
+                code: g.game.code,
+                name: g.me.name,
+                name2: player2.name,
+                snapWire: snapWire
+            })
+
+
+            // NOTE: in the snapWire case, the players aren't meeting.
+            // Just reusing this code for that.
         }
     }
 
@@ -221,6 +246,8 @@ window.$ = function(id) {
             // TODO `crunch: could be optimized with player-joined
             // and also die
             var p = g.game.getPlayer(data.name);
+
+            if (p.wires.length > 0) console.log('Player update wires:', p.name, p.wires)
 
             // Client holds the master copy of the coords.
             // Living dangerously, woohoo!
@@ -351,15 +378,34 @@ Player.prototype.move = function(dir) {
     this.coords.x += dir.x * velocity;
     this.coords.y += dir.y * velocity;
     this.checkMargin();
+    this.checkWires();
     g.game.updateMines(g.me);
     g.views.updatePlayer(this);
 }
 
 Player.prototype.checkMargin = function() {
-    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width * (1 - g.settings.marginR)));
-    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.bbox.width * g.settings.marginL));
+    var margin1 = Math.max(0, this.coords.x - (g.frame.x + g.bbox.width * (1 - Settings.marginR)));
+    var margin2 = Math.min(0, this.coords.x - (g.frame.x + g.bbox.width * Settings.marginL));
     var margin = margin1 || margin2;
     if (margin !== 0) g.views.moveFrame(margin);
+}
+
+Player.prototype.checkWires = function() {
+    // See if any other players are newly inside the wire radius
+    var self = this;
+    g.game.eachPlayer(function(p) {
+        if (p.name === self.name) return;
+
+        var d = distance(p.coords, self.coords);
+        if (!self.hasWireTo(p)) {
+            // No wire exists yet. Check for new wire.
+            // todo: this could be optimized by checking large grained rectangular distance 
+            if (d < Settings.wireNear) g.actions['player-meet'](p);
+        }
+        else {
+            if (d > Settings.wireFar) g.actions['player-meet'](p, true); // snap the wire
+        }
+    })
 }
 
 
@@ -391,11 +437,6 @@ Player.prototype.stopMove = function(id) {
     delete this.moves[id];
     g.actions['player-update-coords']();
 }
-// ======  client/settings.js
-g.settings = {};
-
-g.settings.marginR = 0.4; // percent of view
-g.settings.marginL = 0.2;
 // ======  client/views.js
 window.g = window.g || {};
 
@@ -532,6 +573,17 @@ g.views.updatePlayer = function(player) {
         left: player.coords.x + 'px',
         top: player.coords.y + 'px'
     })
+    
+    // render wires. 
+    player.wires.forEach(function(p2name) {
+        // sort names to avoid duplicates
+        var id = 'pwire_' + [player.name, p2name].sort().join('_')
+        g.views.addWire(id, [
+            player.coords,
+            g.game.getPlayer(p2name).coords
+        ])
+    })
+
 
     // TODO `crunch: I think this is getting called overly much
     g.views.updateSidebarPlayer(player);
@@ -545,3 +597,32 @@ g.views.showGameOver = function(data) {
     $('game-overlay').css({opacity: 1}); // using opacity instead of show for the transition effect
     $('game-msg').html("- " + gameover + " -<br />" + data.reason);
 }
+
+// svg stuff
+// temporary wire lines. These will be improved
+g.views.wires = {}; 
+
+g.views.addWire = function(id, coordList) {
+    var pathString = 'M' + coordList.map(function(coords) { return coords.x + ' ' + coords.y; }).join(' L ');
+
+    // SVG is finnicky. Have to set the inner html.
+    //var pathString = "M" + [coords1.x, coords1.y, 'L', coords2.x, coords2.y, 'Z'].join(' ');
+    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="2" stroke="white" fill="transparent"></path>';
+
+    g.views.wires[id] = pathHtml;
+    g.views.renderWires();
+
+    return pathHtml;
+}
+
+g.views.removeWire = function(id) {
+    console.log('Deleting id:', id)
+    delete g.views.wires[id];
+    g.views.renderWires();
+}
+
+g.views.renderWires = function() {
+    // `crunch this is rather verbose for what it is doing.
+    $('wires').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
+}
+
