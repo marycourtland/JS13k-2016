@@ -65,7 +65,9 @@ g.views.moveFrame = function(distance) {
     // only horizontal movement
     // TODO: clinch it between left and right borders
     g.frame.x += distance;
-    $('gameplay').css({'left': '-' + g.frame.x + 'px'})
+    var move = {'left': '-' + g.frame.x + 'px'};
+    $('gameplay').css(move);
+    $('wires').css(move);
 }
 
 // mines
