@@ -48,9 +48,15 @@ Game.prototype.updateMines = function(player) {
         // TODO: filter mines which are in view
         var mine = this.mines[i];
         if (mine.hidden) continue;
+
+        var word = mine.getWord();
+
         var d = distance(player.coords, mine.coords);
-        if (d < mine.getWord().distance) {
+        if (d < word.distance) {
             g.actions['mine-level-up'](i);
+        }
+        else if (d > word.levelDownDistance) {
+            g.actions['mine-level-down'](i)
         }
         else {
             // render the mine text at a different size
@@ -135,6 +141,7 @@ window.$ = function(id) {
     var socket; //Socket.IO client
 
     // gameplay actions
+    // `CRUNCH: could combine mine-level-up and mine-level-down
     g.actions = {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
@@ -152,6 +159,23 @@ window.$ = function(id) {
 
             g.views.updateMine(i);
             g.views.bounce($('mine-' + i));
+        },
+
+        'mine-level-down': function(i) {
+            var mine = g.game.mines[i];
+            if (!mine.canPlayerTrigger(g.me)) return;
+
+            console.log('Mine levelled down:', mine.getWord().text)
+            mine.levelDown(g.me);
+
+            if (!mine.getWord().singlePlayerOnly)
+                socket.emit('mine_level_down', {
+                    code: g.game.code,
+                    name: g.me.name,
+                    mine_index: i
+                })
+
+            g.views.updateMine(i);
         },
 
         'player-move-start': function(data) {
@@ -534,6 +558,7 @@ g.views.updateMine = function(index, size) {
     $mine.html(lines.join('<br/>')).css({
         'left': mine.coords.x + 'px',
         'top': mine.coords.y + 'px',
+        'color': word.color || 'white',
         'fontWeight': (size <= 8) ? 200 : 800
     })
     if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})

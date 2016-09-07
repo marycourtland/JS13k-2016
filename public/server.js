@@ -8,7 +8,7 @@ var mineData = [];
 // Area B: inside the space station
 
 var checkpoints = [
-    xy(250, 150),
+    xy(850, 150),
     xy(2600, 260)
 ];
 
@@ -19,7 +19,6 @@ var oxyCans = [
     xy(1600, 250),
     xy(2200, 75)
 ]
-
 
 for (var i = 0; i < checkpoints.length; i++) {
     mineData.push({
@@ -240,6 +239,26 @@ templates.debris = function (params) {
     }
 }
 
+// TESTING - nonlevelling mines
+mineData.push({
+    id: 'nl0',
+    coords: xy(250, 100),
+    words: [
+        {size:10, distance: 50, text: 'test1'},
+        {size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
+    ]
+})
+mineData.push({
+    id: 'nl1',
+    coords: xy(100, 300),
+    words: [
+        {size:10, distance: 120, text: 'something to investigate'},
+        {size:16, distance: 50, text: 'investigating...', color: '#ADD8E6', levelDownDistance: 120},
+        {size:16, distance: 0, text: 'something interesting', color: '#4AB8DC'}
+    ]
+})
+
+
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
 mineData.forEach(function(mine) {
     if (!!mine.area) return;
@@ -416,6 +435,23 @@ module.exports = function (socket) {
 
             payload.mine.trigger(payload.player);
             payload.mine.levelUp(payload.player);
+
+            payload.game.emit('update_mine', {
+                mine_index: data.mine_index,
+                mine: payload.mine.data()
+            })
+        }
+    })
+
+    // `CRUNCH - COMBINE WITH ABOVE **
+    socket.bind("mine_level_down", function(data) {
+        // expect: data.code, data.mine_index, data.name
+        var payload = vivify(data, socket);
+        if (payload.mine && payload.game) {
+            if (!payload.mine.canPlayerTrigger(payload.player)) return;
+
+            payload.mine.trigger(payload.player);
+            payload.mine.levelDown(payload.player);
 
             payload.game.emit('update_mine', {
                 mine_index: data.mine_index,

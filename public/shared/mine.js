@@ -22,9 +22,10 @@ Mine.prototype.updateFromData = function(data) {
     this.area = data.area || '';
     this.game = data.game;
     this.level = data.level || 0;
-    this.singlePlayerOnly = data.singlePlayerOnly || 0;
+    this.singlePlayerOnly = data.singlePlayerOnly || 0; // TODO `crunch is this used...?
     this.wires = data.wires || [];
     this.wirable = data.wirable || 0;
+    this.levelDownDistance = data.levelDownDistance || 0;
 }
 
 Mine.prototype.data = function() {
@@ -38,7 +39,8 @@ Mine.prototype.data = function() {
         level: this.level,
         singlePlayerOnly: this.singlePlayerOnly,
         wirable: this.wirable,
-        wires: this.wires
+        wires: this.wires,
+        levelDownDistance: this.levelDownDistance
     }
 }
 

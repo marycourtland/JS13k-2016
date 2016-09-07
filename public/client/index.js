@@ -16,6 +16,7 @@
     var socket; //Socket.IO client
 
     // gameplay actions
+    // `CRUNCH: could combine mine-level-up and mine-level-down
     g.actions = {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
@@ -33,6 +34,23 @@
 
             g.views.updateMine(i);
             g.views.bounce($('mine-' + i));
+        },
+
+        'mine-level-down': function(i) {
+            var mine = g.game.mines[i];
+            if (!mine.canPlayerTrigger(g.me)) return;
+
+            console.log('Mine levelled down:', mine.getWord().text)
+            mine.levelDown(g.me);
+
+            if (!mine.getWord().singlePlayerOnly)
+                socket.emit('mine_level_down', {
+                    code: g.game.code,
+                    name: g.me.name,
+                    mine_index: i
+                })
+
+            g.views.updateMine(i);
         },
 
         'player-move-start': function(data) {

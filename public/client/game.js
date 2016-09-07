@@ -3,9 +3,15 @@ Game.prototype.updateMines = function(player) {
         // TODO: filter mines which are in view
         var mine = this.mines[i];
         if (mine.hidden) continue;
+
+        var word = mine.getWord();
+
         var d = distance(player.coords, mine.coords);
-        if (d < mine.getWord().distance) {
+        if (d < word.distance) {
             g.actions['mine-level-up'](i);
+        }
+        else if (d > word.levelDownDistance) {
+            g.actions['mine-level-down'](i)
         }
         else {
             // render the mine text at a different size
