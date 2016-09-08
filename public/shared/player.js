@@ -50,3 +50,20 @@ Player.prototype.hasWireTo = function(player2) {
     return this.wires.indexOf(player2.name) !== -1;
 }
 
+// Looks for all other players on other ends of the wires that this player is holding,
+// and executes callback for each of those players
+Player.prototype.forEachWire = function(callback) {
+    var self = this;
+    self.wires.forEach(function(name) {
+        var player2 = self.game.getPlayer(name);
+
+        // ignore asymmetric/incomplete wires
+        if (!player2.hasWireTo(self)) return;
+
+        callback(player2);
+    })
+}
+
+Player.prototype.lastTriggeredMine = function(callback) {
+    return this.game.getMineById(this._lastTriggeredMine);
+}

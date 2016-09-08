@@ -6,6 +6,9 @@ Game.prototype.updateMines = function(player) {
 
         var word = mine.getWord();
 
+        if (!word) {
+            console.log('WTF?')
+        }
         var d = distance(player.coords, mine.coords);
         if (d < word.distance) {
             g.actions['mine-level-up'](i);

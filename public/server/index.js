@@ -70,28 +70,19 @@ module.exports = function (socket) {
 
             payload.mine.trigger(payload.player);
             payload.mine.levelUp(payload.player);
+            payload.mine.emitUpdate();
 
-            payload.game.emit('update_mine', {
-                mine_index: data.mine_index,
-                mine: payload.mine.data()
-            })
         }
     })
 
-    // `CRUNCH - COMBINE WITH ABOVE **
     socket.bind("mine_level_down", function(data) {
         // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
             if (!payload.mine.canPlayerTrigger(payload.player)) return;
 
-            payload.mine.trigger(payload.player);
             payload.mine.levelDown(payload.player);
-
-            payload.game.emit('update_mine', {
-                mine_index: data.mine_index,
-                mine: payload.mine.data()
-            })
+            payload.mine.emitUpdate();
         }
     })
     

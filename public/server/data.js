@@ -241,19 +241,24 @@ templates.debris = function (params) {
 // TESTING - nonlevelling mines
 mineData.push({
     id: 'nl0',
-    coords: xy(250, 100),
+    coords: xy(300, 50),
+    wirable: 1,
     words: [
-        {size:10, distance: 50, text: 'test1'},
+        {size:10, distance: 30, text: 'test1', triggers: {
+            wire: {playerRadius: 50}
+        }},
         {size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
     ]
 })
 mineData.push({
     id: 'nl1',
     coords: xy(100, 300),
+    wirable: 1,
     words: [
-        {size:10, distance: 120, text: 'something to investigate'},
-        {size:16, distance: 50, text: 'investigating...', color: '#ADD8E6', levelDownDistance: 120},
-        {size:16, distance: 0, text: 'something interesting', color: '#4AB8DC'}
+        {size:10, distance: 30, text: 'test2', triggers: {
+            wire: {playerRadius: 50}
+        }},
+        {size:16, distance: 0, text: 'test2b', color: '#ADD8E6', levelDownDistance: 80, }
     ]
 })
 

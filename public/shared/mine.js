@@ -71,4 +71,9 @@ Mine.prototype.levelUp = function(player) {
 
 Mine.prototype.levelDown = function() {
     this.level -= 1;
+    this.level = Math.max(0, this.level);
+}
+
+Mine.prototype.hasWireTo = function(mine2) {
+    return this.wires.indexOf(mine2.id) !== -1;
 }

@@ -36,6 +36,7 @@ Game.prototype = {};
 // TODO: find a better way to do this
 Game.prototype.init = function() {
     this.getPlayer = _.propFinder(this.players, 'name')
+    this.getMineById = _.propFinder(this.mines, 'id')
 }
 
 Game.prototype.updateFromData = function(data) {
@@ -117,6 +118,9 @@ function range(min, max, step) {
     for (var i = min; i < max; i += step) { r.push(i); }
     return r;
 }
+
+var distance = function(v1, v2) { return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)); }
+
 
 function xy(x, y) {
     return {x:x, y:y};
@@ -221,6 +225,11 @@ Mine.prototype.levelUp = function(player) {
 
 Mine.prototype.levelDown = function() {
     this.level -= 1;
+    this.level = Math.max(0, this.level);
+}
+
+Mine.prototype.hasWireTo = function(mine2) {
+    return this.wires.indexOf(mine2.id) !== -1;
 }
 // ======  shared/player.js
 function Player(data) {
@@ -275,6 +284,23 @@ Player.prototype.hasWireTo = function(player2) {
     return this.wires.indexOf(player2.name) !== -1;
 }
 
+// Looks for all other players on other ends of the wires that this player is holding,
+// and executes callback for each of those players
+Player.prototype.forEachWire = function(callback) {
+    var self = this;
+    self.wires.forEach(function(name) {
+        var player2 = self.game.getPlayer(name);
+
+        // ignore asymmetric/incomplete wires
+        if (!player2.hasWireTo(self)) return;
+
+        callback(player2);
+    })
+}
+
+Player.prototype.lastTriggeredMine = function(callback) {
+    return this.game.getMineById(this._lastTriggeredMine);
+}
 // ======  shared/settings.js
 var Settings = {};
 
@@ -297,14 +323,14 @@ Settings.wireFar = 600; // pixels, as the crow flies
 function setupSocket(socket) {
     var _emit = socket.emit;
     socket.emit = function() {
-        console.log(socket.id + ' emit: ' + arguments[0])
+//        console.log(socket.id + ' emit: ' + arguments[0])
         _emit.apply(socket, arguments);
     }
 
     socket.bind = function(signal, callback) {
         callback = ensureFunction(callback);
         socket.on(signal, function() {
-            console.log(socket.id + ' > ' + signal);
+ //           console.log(socket.id + ' > ' + signal);
             callback.apply(null, arguments);
         })
     }

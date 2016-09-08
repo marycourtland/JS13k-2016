@@ -242,19 +242,24 @@ templates.debris = function (params) {
 // TESTING - nonlevelling mines
 mineData.push({
     id: 'nl0',
-    coords: xy(250, 100),
+    coords: xy(300, 50),
+    wirable: 1,
     words: [
-        {size:10, distance: 50, text: 'test1'},
+        {size:10, distance: 30, text: 'test1', triggers: {
+            wire: {playerRadius: 50}
+        }},
         {size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
     ]
 })
 mineData.push({
     id: 'nl1',
     coords: xy(100, 300),
+    wirable: 1,
     words: [
-        {size:10, distance: 120, text: 'something to investigate'},
-        {size:16, distance: 50, text: 'investigating...', color: '#ADD8E6', levelDownDistance: 120},
-        {size:16, distance: 0, text: 'something interesting', color: '#4AB8DC'}
+        {size:10, distance: 30, text: 'test2', triggers: {
+            wire: {playerRadius: 50}
+        }},
+        {size:16, distance: 0, text: 'test2b', color: '#ADD8E6', levelDownDistance: 80, }
     ]
 })
 
@@ -435,28 +440,19 @@ module.exports = function (socket) {
 
             payload.mine.trigger(payload.player);
             payload.mine.levelUp(payload.player);
+            payload.mine.emitUpdate();
 
-            payload.game.emit('update_mine', {
-                mine_index: data.mine_index,
-                mine: payload.mine.data()
-            })
         }
     })
 
-    // `CRUNCH - COMBINE WITH ABOVE **
     socket.bind("mine_level_down", function(data) {
         // expect: data.code, data.mine_index, data.name
         var payload = vivify(data, socket);
         if (payload.mine && payload.game) {
             if (!payload.mine.canPlayerTrigger(payload.player)) return;
 
-            payload.mine.trigger(payload.player);
             payload.mine.levelDown(payload.player);
-
-            payload.game.emit('update_mine', {
-                mine_index: data.mine_index,
-                mine: payload.mine.data()
-            })
+            payload.mine.emitUpdate();
         }
     })
     
@@ -506,12 +502,30 @@ Mine.prototype.increment = function() {
    this.stage += 1; 
 }
 
+Mine.prototype.emitUpdate = function() {
+    this.game.emit('update_mine', {
+        mine_index: this.index,
+        mine: this.data()
+    })
+}
+
 Mine.prototype.trigger = function(player) {
+    player._lastTriggeredMine = this.id;
+
     var triggerList = this.getWord().triggers || {}; 
     for (var t in triggerList) {
         if (t in Triggers) Triggers[t](player, this, triggerList[t]);
     }
 }
+
+// TODO `CRUNCH: so.... this is the same as the Player.addWireTo method.
+// could stick the same method on the two prototypes
+Mine.prototype.addWireTo = function(mine2) {
+    if (this.hasWireTo(mine2)) return;
+    this.wires.push(mine2.id);
+    this.emitUpdate();
+}
+
 // ======  server/player.js
 Player.prototype.emitUpdate = function() {
     this.game.emit('player-update', {name: this.name, player: this.data()})
@@ -609,6 +623,36 @@ Triggers['spawn'] = function(player, mine, spawnData) {
         })
     }
 }
+
+// WIRING MINES TOGETHER
+// NB: the playerRadius property is how far we expect the OTHER player to be
+// from the OTHER wirable mine
+Triggers['wire'] = function(player, mine, data) {
+    // ASSUMPTION: mine.wirable = true
+    player.forEachWire(function(player2) {
+        var mine2 = player2.lastTriggeredMine()
+        if (!mine2) return;
+        if (!mine2.wirable) return;
+        if (mine2.hasWireTo(mine)) return;
+        if (mine.hasWireTo(mine2)) return;
+        if (distance(player2.coords, mine2.coords) > mine.playerRadius) return;
+        console.log(
+            'NEW WIRE: ',
+            player.name + '|' + mine.id,
+            '..>>..',
+            player2.name + '|' + mine2.id
+        )
+
+        // if the player is within a good distance of a wirable mine, then we're good to go!!
+        mine.addWireTo(mine2);
+        mine2.addWireTo(mine);
+        player.removeWire(player2);
+        player2.removeWire(player);
+    })
+}
+
+
+// GAME STATE
 
 Triggers['win'] = function(player, mine) {
     player.game.win();

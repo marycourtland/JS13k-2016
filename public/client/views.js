@@ -98,6 +98,16 @@ g.views.updateMine = function(index, size) {
         'fontWeight': (size <= 8) ? 200 : 800
     })
     if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})
+
+    // Render wires. `CRUNCH: similar to player wire rendering
+    mine.wires.forEach(function(mine2id) {
+        // sort names to avoid duplicates
+        var id = 'mwire_' + [mine.id, mine2id].sort().join('_')
+        g.views.addWire(id, 
+            mine.coords,
+            g.game.getMineById(mine2id).coords
+        )
+    })
 }
 
 g.views.bounce = function($el) {

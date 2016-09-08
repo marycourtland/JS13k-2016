@@ -51,6 +51,9 @@ Game.prototype.updateMines = function(player) {
 
         var word = mine.getWord();
 
+        if (!word) {
+            console.log('WTF?')
+        }
         var d = distance(player.coords, mine.coords);
         if (d < word.distance) {
             g.actions['mine-level-up'](i);
@@ -375,8 +378,6 @@ window.addEventListener("keyup", function(event) {
         g.me.stopMove(key);
     }    
 })
-// ======  client/math.js
-distance = function(v1, v2) { return Math.sqrt(Math.pow(v1.x - v2.x, 2) + Math.pow(v1.y - v2.y, 2)); }
 // ======  client/mine.js
 var d0 = 200; // distance at which the first text starts enlarging
 
@@ -562,6 +563,16 @@ g.views.updateMine = function(index, size) {
         'fontWeight': (size <= 8) ? 200 : 800
     })
     if (!$mine.bouncing) $mine.css({'fontSize': size + 'px'})
+
+    // Render wires. `CRUNCH: similar to player wire rendering
+    mine.wires.forEach(function(mine2id) {
+        // sort names to avoid duplicates
+        var id = 'mwire_' + [mine.id, mine2id].sort().join('_')
+        g.views.addWire(id, 
+            mine.coords,
+            g.game.getMineById(mine2id).coords
+        )
+    })
 }
 
 g.views.bounce = function($el) {

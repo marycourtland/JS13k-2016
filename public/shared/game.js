@@ -27,6 +27,7 @@ Game.prototype = {};
 // TODO: find a better way to do this
 Game.prototype.init = function() {
     this.getPlayer = _.propFinder(this.players, 'name')
+    this.getMineById = _.propFinder(this.mines, 'id')
 }
 
 Game.prototype.updateFromData = function(data) {
