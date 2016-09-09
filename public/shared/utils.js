@@ -17,3 +17,7 @@ _.propFinder = function(objArray, property) {
 _.mapProp = function(objArray, property) {
     return objArray.map(function(obj) { return obj[property]; })
 }
+
+function getWireId(s1, s2) {
+    return 'wire_' + [s1, s2].sort().join('_');
+}

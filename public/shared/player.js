@@ -7,6 +7,7 @@ Player.prototype = {};
 
 Player.prototype.updateFromData = function(data) {
     this.name = data.name;
+    this.id = data.name; // for player/mine interop
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
@@ -20,6 +21,7 @@ Player.prototype.updateFromData = function(data) {
 Player.prototype.data = function() {
     return {
         name: this.name,
+        id: this.id,
         game: this.game.code,
         checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,

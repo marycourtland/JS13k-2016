@@ -95,20 +95,21 @@ module.exports = function (socket) {
 
     socket.bind("player-meet", function(data) {
         var payload = vivify(data, socket);
-        var p1 = payload.player;
-        var p2 = payload.player2;
-
-        if (data.snapWire) {
-            p1.removeWire(p2);
-            p2.removeWire(p1);
-            return;
-        }
+        var p1 = payload.player, p2 = payload.player2;
 
         // Debounce if lots of these signals get spammed at once
         if (p1.hasWireTo(p2)) return;
 
         p1.addWireTo(p2);
         p2.addWireTo(p1);
+    })
+
+    socket.bind('player-snap', function(data) {
+        var payload = vivify(data, socket);
+        var p1=payload.player, p2=payload.player2;
+        p1.removeWire(p2);
+        p2.removeWire(p1);
+        
     })
 
 

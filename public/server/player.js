@@ -12,13 +12,21 @@ Player.prototype.setCheckpoint = function(coords) {
 Player.prototype.addWireTo = function(player2) {
     if (this.hasWireTo(player2)) return;
     this.wires.push(player2.name);
+
+    // it would be nice to not have two emits here... but oh well.
+    this.game.emit('wire-add', {
+        wire_id: getWireId(this.name, player2.name)
+    })
     this.emitUpdate();
 }
 
 Player.prototype.removeWire = function(player2) {
     if (!this.hasWireTo(player2)) return;
     this.wires.splice(this.wires.indexOf(player2.name), 1)
-    this.emitUpdate();
+    this.game.emit('wire-remove', {
+        player1: this.name,
+        player2: player2.name
+    });
 }
 
 

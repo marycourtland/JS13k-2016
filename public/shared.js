@@ -241,6 +241,7 @@ Player.prototype = {};
 
 Player.prototype.updateFromData = function(data) {
     this.name = data.name;
+    this.id = data.name; // for player/mine interop
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
@@ -254,6 +255,7 @@ Player.prototype.updateFromData = function(data) {
 Player.prototype.data = function() {
     return {
         name: this.name,
+        id: this.id,
         game: this.game.code,
         checkpoint: this.checkpoint,
         glitchLevel: this.glitchLevel,
@@ -316,6 +318,8 @@ Settings.glitchPerDeath = 1;
 Settings.marginR = 0.4; // percent of the view
 Settings.marginL = 0.2;
 
+Settings.velocity = 5;
+
 // wireNear and wireFar control when player wires form and break
 Settings.wireNear = 30; // pixels
 Settings.wireFar = 600; // pixels, as the crow flies 
@@ -323,14 +327,14 @@ Settings.wireFar = 600; // pixels, as the crow flies
 function setupSocket(socket) {
     var _emit = socket.emit;
     socket.emit = function() {
-//        console.log(socket.id + ' emit: ' + arguments[0])
+        console.log(socket.id + ' emit: ' + arguments[0])
         _emit.apply(socket, arguments);
     }
 
     socket.bind = function(signal, callback) {
         callback = ensureFunction(callback);
         socket.on(signal, function() {
- //           console.log(socket.id + ' > ' + signal);
+            console.log(socket.id + ' > ' + signal);
             callback.apply(null, arguments);
         })
     }
@@ -357,4 +361,8 @@ _.propFinder = function(objArray, property) {
 
 _.mapProp = function(objArray, property) {
     return objArray.map(function(obj) { return obj[property]; })
+}
+
+function getWireId(s1, s2) {
+    return 'wire_' + [s1, s2].sort().join('_');
 }

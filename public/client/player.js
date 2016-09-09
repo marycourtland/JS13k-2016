@@ -1,4 +1,4 @@
-var velocity = 5;
+
 
 Player.prototype.isMe = function() {
     return this.name === g.me.name;
@@ -6,8 +6,8 @@ Player.prototype.isMe = function() {
 
 Player.prototype.move = function(dir) {
     // dir should be coords
-    this.coords.x += dir.x * velocity;
-    this.coords.y += dir.y * velocity;
+    this.coords.x += dir.x * Settings.velocity;
+    this.coords.y += dir.y * Settings.velocity;
     this.checkMargin();
     this.checkWires();
     g.game.updateMines(g.me);
@@ -24,6 +24,7 @@ Player.prototype.checkMargin = function() {
 Player.prototype.checkWires = function() {
     // See if any other players are newly inside the wire radius
     var self = this;
+    if (self.name !== g.me.name) return;
     g.game.eachPlayer(function(p) {
         if (p.name === self.name) return;
 
@@ -34,9 +35,15 @@ Player.prototype.checkWires = function() {
             if (d < Settings.wireNear) g.actions['player-meet'](p);
         }
         else {
-            if (d > Settings.wireFar) g.actions['player-meet'](p, true); // snap the wire
+            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
         }
     })
+}
+
+// `CRUNCH: this is same as server, except without the emit
+Player.prototype.removeWire = function(player2) {
+    if (!this.hasWireTo(player2)) return;
+    this.wires.splice(this.wires.indexOf(player2.name), 1)
 }
 
 

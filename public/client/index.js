@@ -71,23 +71,22 @@
             })
         },
 
-        'player-meet': function(player2, snapWire) {
-            // TODO: this is not always erasing the wire. Probably because of multiple
-            // signals overriding the first signal. Please fix.
-            if (snapWire) {
-                 g.views.removeWire('pwire_' + [g.me.name, player2.name].sort().join('_'));
-            }
-
+        'player-meet': function(player2) {
             socket.emit('player-meet', {
                 code: g.game.code,
                 name: g.me.name,
                 name2: player2.name,
-                snapWire: snapWire
             })
+        },
 
-
-            // NOTE: in the snapWire case, the players aren't meeting.
-            // Just reusing this code for that.
+        'player-snap': function(player2) {
+            var wire_id = getWireId(g.me.name, player2.name);
+            g.views.removeWire(wire_id);
+            socket.emit('player-snap', {
+                code: g.game.code,
+                name: g.me.name,
+                name2: player2.name,
+            })
         }
     }
 
@@ -146,15 +145,26 @@
             // and also die
             var p = g.game.getPlayer(data.name);
 
-            if (p.wires.length > 0) console.log('Player update wires:', p.name, p.wires)
-
             // Client holds the master copy of the coords.
             // Living dangerously, woohoo!
             // TODO: ......improvement needed.
-            data.player.coords = g.game.getPlayer(data.name).coords;
+            data.player.coords = p.coords;
 
             p.updateFromData(data.player);
             g.views.updatePlayer(p);
+        },
+
+        'wire-add': function(data) {
+            // The player view update method is responsible for actually rendering
+            // the wires, but they'll only do it if this id is registered with g.views.wires
+            g.views.wires[data.wire_id] = ' ';
+        },
+
+        'wire-remove': function(data) {
+            var wire_id = getWireId(data.player1, data.player2);
+            g.game.getPlayer(data.player1).removeWire(data.player2);
+            g.game.getPlayer(data.player2).removeWire(data.player1);
+            g.views.removeWire(wire_id); 
         },
 
         'checkpoint': function(data) {

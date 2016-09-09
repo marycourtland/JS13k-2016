@@ -465,20 +465,21 @@ module.exports = function (socket) {
 
     socket.bind("player-meet", function(data) {
         var payload = vivify(data, socket);
-        var p1 = payload.player;
-        var p2 = payload.player2;
-
-        if (data.snapWire) {
-            p1.removeWire(p2);
-            p2.removeWire(p1);
-            return;
-        }
+        var p1 = payload.player, p2 = payload.player2;
 
         // Debounce if lots of these signals get spammed at once
         if (p1.hasWireTo(p2)) return;
 
         p1.addWireTo(p2);
         p2.addWireTo(p1);
+    })
+
+    socket.bind('player-snap', function(data) {
+        var payload = vivify(data, socket);
+        var p1=payload.player, p2=payload.player2;
+        p1.removeWire(p2);
+        p2.removeWire(p1);
+        
     })
 
 
@@ -523,6 +524,9 @@ Mine.prototype.trigger = function(player) {
 Mine.prototype.addWireTo = function(mine2) {
     if (this.hasWireTo(mine2)) return;
     this.wires.push(mine2.id);
+    this.game.emit('wire-add', {
+        wire_id: getWireId(this.id, mine2.id)
+    })
     this.emitUpdate();
 }
 
@@ -541,13 +545,21 @@ Player.prototype.setCheckpoint = function(coords) {
 Player.prototype.addWireTo = function(player2) {
     if (this.hasWireTo(player2)) return;
     this.wires.push(player2.name);
+
+    // it would be nice to not have two emits here... but oh well.
+    this.game.emit('wire-add', {
+        wire_id: getWireId(this.name, player2.name)
+    })
     this.emitUpdate();
 }
 
 Player.prototype.removeWire = function(player2) {
     if (!this.hasWireTo(player2)) return;
     this.wires.splice(this.wires.indexOf(player2.name), 1)
-    this.emitUpdate();
+    this.game.emit('wire-remove', {
+        player1: this.name,
+        player2: player2.name
+    });
 }
 
 

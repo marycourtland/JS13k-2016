@@ -23,6 +23,9 @@ Mine.prototype.trigger = function(player) {
 Mine.prototype.addWireTo = function(mine2) {
     if (this.hasWireTo(mine2)) return;
     this.wires.push(mine2.id);
+    this.game.emit('wire-add', {
+        wire_id: getWireId(this.id, mine2.id)
+    })
     this.emitUpdate();
 }
 

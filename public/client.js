@@ -199,23 +199,22 @@ window.$ = function(id) {
             })
         },
 
-        'player-meet': function(player2, snapWire) {
-            // TODO: this is not always erasing the wire. Probably because of multiple
-            // signals overriding the first signal. Please fix.
-            if (snapWire) {
-                 g.views.removeWire('pwire_' + [g.me.name, player2.name].sort().join('_'));
-            }
-
+        'player-meet': function(player2) {
             socket.emit('player-meet', {
                 code: g.game.code,
                 name: g.me.name,
                 name2: player2.name,
-                snapWire: snapWire
             })
+        },
 
-
-            // NOTE: in the snapWire case, the players aren't meeting.
-            // Just reusing this code for that.
+        'player-snap': function(player2) {
+            var wire_id = getWireId(g.me.name, player2.name);
+            g.views.removeWire(wire_id);
+            socket.emit('player-snap', {
+                code: g.game.code,
+                name: g.me.name,
+                name2: player2.name,
+            })
         }
     }
 
@@ -274,15 +273,26 @@ window.$ = function(id) {
             // and also die
             var p = g.game.getPlayer(data.name);
 
-            if (p.wires.length > 0) console.log('Player update wires:', p.name, p.wires)
-
             // Client holds the master copy of the coords.
             // Living dangerously, woohoo!
             // TODO: ......improvement needed.
-            data.player.coords = g.game.getPlayer(data.name).coords;
+            data.player.coords = p.coords;
 
             p.updateFromData(data.player);
             g.views.updatePlayer(p);
+        },
+
+        'wire-add': function(data) {
+            // The player view update method is responsible for actually rendering
+            // the wires, but they'll only do it if this id is registered with g.views.wires
+            g.views.wires[data.wire_id] = ' ';
+        },
+
+        'wire-remove': function(data) {
+            var wire_id = getWireId(data.player1, data.player2);
+            g.game.getPlayer(data.player1).removeWire(data.player2);
+            g.game.getPlayer(data.player2).removeWire(data.player1);
+            g.views.removeWire(wire_id); 
         },
 
         'checkpoint': function(data) {
@@ -392,7 +402,7 @@ Mine.prototype.interpolateSize = function(distance, i) {
     return Math.max(word.size, word.size + (nextWord.size - word.size) * progress)
 }
 // ======  client/player.js
-var velocity = 5;
+
 
 Player.prototype.isMe = function() {
     return this.name === g.me.name;
@@ -400,8 +410,8 @@ Player.prototype.isMe = function() {
 
 Player.prototype.move = function(dir) {
     // dir should be coords
-    this.coords.x += dir.x * velocity;
-    this.coords.y += dir.y * velocity;
+    this.coords.x += dir.x * Settings.velocity;
+    this.coords.y += dir.y * Settings.velocity;
     this.checkMargin();
     this.checkWires();
     g.game.updateMines(g.me);
@@ -418,6 +428,7 @@ Player.prototype.checkMargin = function() {
 Player.prototype.checkWires = function() {
     // See if any other players are newly inside the wire radius
     var self = this;
+    if (self.name !== g.me.name) return;
     g.game.eachPlayer(function(p) {
         if (p.name === self.name) return;
 
@@ -428,9 +439,15 @@ Player.prototype.checkWires = function() {
             if (d < Settings.wireNear) g.actions['player-meet'](p);
         }
         else {
-            if (d > Settings.wireFar) g.actions['player-meet'](p, true); // snap the wire
+            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
         }
     })
+}
+
+// `CRUNCH: this is same as server, except without the emit
+Player.prototype.removeWire = function(player2) {
+    if (!this.hasWireTo(player2)) return;
+    this.wires.splice(this.wires.indexOf(player2.name), 1)
 }
 
 
@@ -566,12 +583,15 @@ g.views.updateMine = function(index, size) {
 
     // Render wires. `CRUNCH: similar to player wire rendering
     mine.wires.forEach(function(mine2id) {
-        // sort names to avoid duplicates
-        var id = 'mwire_' + [mine.id, mine2id].sort().join('_')
-        g.views.addWire(id, 
-            mine.coords,
-            g.game.getMineById(mine2id).coords
-        )
+        var id = getWireId(mine.id, mine2id);
+
+        // g.views.wires is a 'master list' of wires which 'should' be in view
+        if(id in g.views.wires) { 
+            g.views.addWire(id, 
+                mine.coords,
+                g.game.getMineById(mine2id).coords
+            )
+        }
     })
 }
 
@@ -615,7 +635,7 @@ g.views.updatePlayer = function(player) {
     // render wires. 
     player.wires.forEach(function(p2name) {
         // sort names to avoid duplicates
-        var id = 'pwire_' + [player.name, p2name].sort().join('_')
+        var id = getWireId(player.name, p2name);
         g.views.addWire(id, 
             player.coords,
             g.game.getPlayer(p2name).coords
@@ -641,6 +661,7 @@ g.views.showGameOver = function(data) {
 g.views.wires = {}; 
 
 g.views.addWire = function(id, coordsA, coordsB) {
+    if (!(id in g.views.wires)) return;
     // sort them...
     // `TODO `CRUNCH maybe optimize this ???
     var sX = (coordsB.x - coordsA.x); 
@@ -663,9 +684,12 @@ g.views.addWire = function(id, coordsA, coordsB) {
     v1.y /= 2;
 
     var coordList = [coordsA];
-    coordList.push(V.add(coordsA, v1));
-    coordList.push(V.add(coordList[1], v2));
-    coordList.push(V.add(coordList[2], v1));
+    if (sX !== 0 && sY !== 0) {
+        coordList.push(V.add(coordsA, v1));
+        coordList.push(V.add(coordList[1], v2));
+    }
+    //coordList.push(V.add(coordList[2], v1));
+    coordList.push(coordsB);
 
     var pathHtml = g.views.makeLine(id, coordList);
     g.views.wires[id] = pathHtml;
@@ -691,6 +715,6 @@ g.views.removeWire = function(id) {
 
 g.views.renderWires = function() {
     // `crunch this is rather verbose for what it is doing.
-    $('wires').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
+    $('wires').html('').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
 }
 

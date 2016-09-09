@@ -101,12 +101,15 @@ g.views.updateMine = function(index, size) {
 
     // Render wires. `CRUNCH: similar to player wire rendering
     mine.wires.forEach(function(mine2id) {
-        // sort names to avoid duplicates
-        var id = 'mwire_' + [mine.id, mine2id].sort().join('_')
-        g.views.addWire(id, 
-            mine.coords,
-            g.game.getMineById(mine2id).coords
-        )
+        var id = getWireId(mine.id, mine2id);
+
+        // g.views.wires is a 'master list' of wires which 'should' be in view
+        if(id in g.views.wires) { 
+            g.views.addWire(id, 
+                mine.coords,
+                g.game.getMineById(mine2id).coords
+            )
+        }
     })
 }
 
@@ -150,7 +153,7 @@ g.views.updatePlayer = function(player) {
     // render wires. 
     player.wires.forEach(function(p2name) {
         // sort names to avoid duplicates
-        var id = 'pwire_' + [player.name, p2name].sort().join('_')
+        var id = getWireId(player.name, p2name);
         g.views.addWire(id, 
             player.coords,
             g.game.getPlayer(p2name).coords
@@ -176,6 +179,7 @@ g.views.showGameOver = function(data) {
 g.views.wires = {}; 
 
 g.views.addWire = function(id, coordsA, coordsB) {
+    if (!(id in g.views.wires)) return;
     // sort them...
     // `TODO `CRUNCH maybe optimize this ???
     var sX = (coordsB.x - coordsA.x); 
@@ -198,9 +202,12 @@ g.views.addWire = function(id, coordsA, coordsB) {
     v1.y /= 2;
 
     var coordList = [coordsA];
-    coordList.push(V.add(coordsA, v1));
-    coordList.push(V.add(coordList[1], v2));
-    coordList.push(V.add(coordList[2], v1));
+    if (sX !== 0 && sY !== 0) {
+        coordList.push(V.add(coordsA, v1));
+        coordList.push(V.add(coordList[1], v2));
+    }
+    //coordList.push(V.add(coordList[2], v1));
+    coordList.push(coordsB);
 
     var pathHtml = g.views.makeLine(id, coordList);
     g.views.wires[id] = pathHtml;
@@ -226,6 +233,6 @@ g.views.removeWire = function(id) {
 
 g.views.renderWires = function() {
     // `crunch this is rather verbose for what it is doing.
-    $('wires').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
+    $('wires').html('').html(Object.keys(g.views.wires).map(function(k) { return g.views.wires[k] }).join(''));
 }
 
