@@ -50,27 +50,30 @@ var landmarks = [
     {
         id: 'l1',
         coords: {x:2180,y:220},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'master power control'},
-            {size: 28, glitchLevel:0, distance: 30, text:'master power on'},
+            {size: 20, glitchLevel:0, distance: 100, text:'master power control', triggers: {setPower: 1}},
+            {size: 28, glitchLevel:0, distance: 30, text:'master power on', triggers: {wire: {playerRadius: 50}}},
         ]
     },
     {
         id: 'l2',
         coords: {x:2480,y:440},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1}},
+            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
             {size: 28, glitchLevel:0, distance: 30, text:'life support\n powered up'},
         ]
     },
     {
         id: 'l3',
         coords: {x:2820,y:300},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'shuttle\nsystem control'},
+            {size: 20, glitchLevel:0, distance: 100, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}}},
             {size: 28, glitchLevel:0, distance: 30, text:'shuttle\n powered up'},
         ]
     },
@@ -245,9 +248,10 @@ mineData.push({
     wirable: 1,
     words: [
         {size:10, distance: 30, text: 'test1', triggers: {
+            setPower: 1,
             wire: {playerRadius: 50}
         }},
-        {size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
+        //{size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
     ]
 })
 mineData.push({

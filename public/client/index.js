@@ -113,6 +113,7 @@
             var makeNew = data.new;
             if (makeNew) g.game.mines[data.mine_index] = new Mine(data.mine);
             var mine = g.game.mines[data.mine_index];
+            mine.index = data.mine_index;
 
             var levelledUp = (mine.level !== data.mine.level);
             var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
@@ -165,6 +166,15 @@
             g.game.getPlayer(data.player1).removeWire(data.player2);
             g.game.getPlayer(data.player2).removeWire(data.player1);
             g.views.removeWire(wire_id); 
+        },
+
+        'mine-powerup': function(data) {
+            var mine = g.game.mines[data.mine_index];
+            mine.powered = data.powered;
+            g.views.poweredMines[mine.id] = true;
+            g.views.updateMine(data.mine_index);
+            // TODO:
+            // mine.forEachWire: color wire powered up
         },
 
         'checkpoint': function(data) {

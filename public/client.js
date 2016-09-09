@@ -121,6 +121,10 @@ window.$ = function(id) {
         return this;
     }
 
+    $el.removeClass = function(c) {
+        $el.className = $el.className.replace(c, '').replace('  ', ' ');
+    }
+
 
     return $el;
 }
@@ -241,6 +245,7 @@ window.$ = function(id) {
             var makeNew = data.new;
             if (makeNew) g.game.mines[data.mine_index] = new Mine(data.mine);
             var mine = g.game.mines[data.mine_index];
+            mine.index = data.mine_index;
 
             var levelledUp = (mine.level !== data.mine.level);
             var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
@@ -293,6 +298,15 @@ window.$ = function(id) {
             g.game.getPlayer(data.player1).removeWire(data.player2);
             g.game.getPlayer(data.player2).removeWire(data.player1);
             g.views.removeWire(wire_id); 
+        },
+
+        'mine-powerup': function(data) {
+            var mine = g.game.mines[data.mine_index];
+            mine.powered = data.powered;
+            g.views.poweredMines[mine.id] = true;
+            g.views.updateMine(data.mine_index);
+            // TODO:
+            // mine.forEachWire: color wire powered up
         },
 
         'checkpoint': function(data) {
@@ -554,6 +568,8 @@ g.views.moveFrame = function(distance) {
 
 // mines
 
+g.views.poweredMines = {}; // master list.
+
 g.views.renderMine = function(index) {
     var $mine = $(document.createElement('div'));
     $mine.className = 'mine';
@@ -567,6 +583,15 @@ g.views.updateMine = function(index, size) {
     if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
+
+    if (g.views.poweredMines[mine.id]) {
+        if (!$mine.className.match(/powered/)) $mine.className += ' powered';
+    } 
+    else {
+        $mine.removeClass('powered');
+    }
+
+    console.log('MINE POWERED ?????', !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
 
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;
@@ -606,7 +631,7 @@ g.views.bounce = function($el) {
     setTimeout(function() {
         $el.css({'fontSize': s + 'px'});
         setTimeout(function() {
-            $el.className = $el.className.replace('bounce', '');
+            $el.removeClass('bounce');
             $el.bouncing = false;
         }, 200)
     }, 100)

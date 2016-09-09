@@ -24,6 +24,10 @@ window.$ = function(id) {
         return this;
     }
 
+    $el.removeClass = function(c) {
+        $el.className = $el.className.replace(c, '').replace('  ', ' ');
+    }
+
 
     return $el;
 }

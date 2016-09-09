@@ -72,6 +72,8 @@ g.views.moveFrame = function(distance) {
 
 // mines
 
+g.views.poweredMines = {}; // master list.
+
 g.views.renderMine = function(index) {
     var $mine = $(document.createElement('div'));
     $mine.className = 'mine';
@@ -85,6 +87,15 @@ g.views.updateMine = function(index, size) {
     if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
+
+    if (g.views.poweredMines[mine.id]) {
+        if (!$mine.className.match(/powered/)) $mine.className += ' powered';
+    } 
+    else {
+        $mine.removeClass('powered');
+    }
+
+    console.log('MINE POWERED ?????', !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
 
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;
@@ -124,7 +135,7 @@ g.views.bounce = function($el) {
     setTimeout(function() {
         $el.css({'fontSize': s + 'px'});
         setTimeout(function() {
-            $el.className = $el.className.replace('bounce', '');
+            $el.removeClass('bounce');
             $el.bouncing = false;
         }, 200)
     }, 100)

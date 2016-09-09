@@ -51,27 +51,30 @@ var landmarks = [
     {
         id: 'l1',
         coords: {x:2180,y:220},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'master power control'},
-            {size: 28, glitchLevel:0, distance: 30, text:'master power on'},
+            {size: 20, glitchLevel:0, distance: 100, text:'master power control', triggers: {setPower: 1}},
+            {size: 28, glitchLevel:0, distance: 30, text:'master power on', triggers: {wire: {playerRadius: 50}}},
         ]
     },
     {
         id: 'l2',
         coords: {x:2480,y:440},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1}},
+            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
             {size: 28, glitchLevel:0, distance: 30, text:'life support\n powered up'},
         ]
     },
     {
         id: 'l3',
         coords: {x:2820,y:300},
+        wirable: 1,
         words: [
             {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'shuttle\nsystem control'},
+            {size: 20, glitchLevel:0, distance: 100, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}}},
             {size: 28, glitchLevel:0, distance: 30, text:'shuttle\n powered up'},
         ]
     },
@@ -246,9 +249,10 @@ mineData.push({
     wirable: 1,
     words: [
         {size:10, distance: 30, text: 'test1', triggers: {
+            setPower: 1,
             wire: {playerRadius: 50}
         }},
-        {size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
+        //{size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
     ]
 })
 mineData.push({
@@ -522,14 +526,41 @@ Mine.prototype.trigger = function(player) {
 // TODO `CRUNCH: so.... this is the same as the Player.addWireTo method.
 // could stick the same method on the two prototypes
 Mine.prototype.addWireTo = function(mine2) {
+    console.log('*** ADDING WIRE')
     if (this.hasWireTo(mine2)) return;
     this.wires.push(mine2.id);
     this.game.emit('wire-add', {
         wire_id: getWireId(this.id, mine2.id)
     })
     this.emitUpdate();
+    var self = this;
+    console.log('*** GOING TO PROPAGATE POWER DOWN WIRE')
+    setTimeout(function() {
+        console.log('*** PROPAGATING POWER DOWN WIRE')
+        self.propagatePower();
+    }, 50)
 }
 
+Mine.prototype.powerUp = function() {
+    console.log('   POWERUP:', this.id)
+    if (!this.powered) this.powered = 0.5;
+    this.game.emit('mine-powerup', {
+        mine_index: this.index,
+        powered: this.powered
+    })
+}
+
+Mine.prototype.propagatePower = function() {
+    var self = this;
+    console.log('---PROPAGATING POWER this.powered=' + self.powered + ' this.wires=' + JSON.stringify(this.wires));
+    if (self.powered === 0) return;
+    self.powerUp(); // emits update
+    self.wires.forEach(function(mine_id) {
+        console.log('   PROPAGATION TO:', mine_id)
+        self.game.getMineById(mine_id).propagatePower(); 
+    })
+
+}
 // ======  server/player.js
 Player.prototype.emitUpdate = function() {
     this.game.emit('player-update', {name: this.name, player: this.data()})
@@ -678,4 +709,11 @@ Triggers['lifeSupportOn'] = function(player, mine) {
     player.game.eachPlayer(function(p) {
         p.drainOxygen(-(1 - p.oxygen))
     })
+}
+
+Triggers['setPower'] = function(player, mine, powerLevel) {
+    var newPower = (mine.powered === 0);
+    console.log('TRIGGERED SET POWER newPower=' + newPower);
+    mine.powered = powerLevel;
+    if (newPower) mine.propagatePower();
 }

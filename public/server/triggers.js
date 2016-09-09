@@ -93,3 +93,10 @@ Triggers['lifeSupportOn'] = function(player, mine) {
         p.drainOxygen(-(1 - p.oxygen))
     })
 }
+
+Triggers['setPower'] = function(player, mine, powerLevel) {
+    var newPower = (mine.powered === 0);
+    console.log('TRIGGERED SET POWER newPower=' + newPower);
+    mine.powered = powerLevel;
+    if (newPower) mine.propagatePower();
+}
