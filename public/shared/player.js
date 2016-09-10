@@ -11,7 +11,7 @@ Player.prototype.updateFromData = function(data) {
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
-    this.coords = data.coords || xy(140,40);
+    this.coords = data.coords || xy(40, randInt(40, 440));
     this.mineState = data.mineState || {};
     this.oxygen = (typeof data.oxygen === 'number') ? data.oxygen : 1;
     this.wires = data.wires || [];

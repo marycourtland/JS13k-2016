@@ -71,6 +71,7 @@ Mine.prototype.levelUp = function(player) {
     if (prevWord.pbatch) player.addPBatch(this, prevWord);
 
     this.level += 1;
+    this.level = Math.min(this.words.length - 1, this.level);
 }
 
 Mine.prototype.levelDown = function() {

@@ -4,6 +4,7 @@ var Settings = {};
 Settings.tickTimeout = 5000; // ms
 Settings.oxygenDrain = 0.05; // player will die in 20 ticks
 Settings.glitchPerDeath = 1;
+Settings.playerWireRadius = 50; // if the player on the other side is closer than that, make a wire
 
 
 // CLIENT SIDE ==============================

@@ -95,7 +95,7 @@ g.views.updateMine = function(index, size) {
         $mine.removeClass('powered');
     }
 
-    console.log('MINE POWERED ?????', !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
+    //console.log('MINE POWERED ?????', mine.id, !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
 
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;
@@ -237,7 +237,6 @@ g.views.makeLine = function(id, coordList) {
 }
 
 g.views.removeWire = function(id) {
-    console.log('Deleting id:', id)
     delete g.views.wires[id];
     g.views.renderWires();
 }

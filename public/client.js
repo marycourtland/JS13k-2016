@@ -153,7 +153,7 @@ window.$ = function(id) {
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
-            //if (mine.level === mine.words.length - 1) return; // no need
+            //if (mine.level === mine.words.length - 1) return; // TODO: Reintroduce this when mine data wonkiness is fixed. It prevents doublebounces etc.
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
 
@@ -249,6 +249,8 @@ window.$ = function(id) {
 
             var levelledUp = (mine.level !== data.mine.level);
             var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
+
+            //console.log('>>> update_mine', mine.index, mine.id, levelledUp, mine.level, data.mine.level)
 
             // special effect: randomly popping newly revealed mines into view
             var delay = typeof data.delay === 'number' ? data.delay : (revealedMine) ? randFloat(1000) : 0;
@@ -591,7 +593,7 @@ g.views.updateMine = function(index, size) {
         $mine.removeClass('powered');
     }
 
-    console.log('MINE POWERED ?????', !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
+    //console.log('MINE POWERED ?????', mine.id, !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
 
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;
@@ -733,7 +735,6 @@ g.views.makeLine = function(id, coordList) {
 }
 
 g.views.removeWire = function(id) {
-    console.log('Deleting id:', id)
     delete g.views.wires[id];
     g.views.renderWires();
 }

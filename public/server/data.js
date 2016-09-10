@@ -134,7 +134,7 @@ for (var category in decorations) {
 var glitchy = [
     {
         id: 'g0',
-        coords: xy(450, 350),
+        coords: xy(550, 500),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
             {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: {
@@ -247,7 +247,7 @@ mineData.push({
     coords: xy(300, 50),
     wirable: 1,
     words: [
-        {size:10, distance: 30, text: 'test1', triggers: {
+        {size:10, distance: 30, text: 'test power source', triggers: {
             setPower: 1,
             wire: {playerRadius: 50}
         }},
@@ -256,15 +256,28 @@ mineData.push({
 })
 mineData.push({
     id: 'nl1',
-    coords: xy(100, 300),
+    coords: xy(200, 200),
     wirable: 1,
     words: [
-        {size:10, distance: 30, text: 'test2', triggers: {
+        {size:10, distance: 30, text: 'test node', triggers: {
             wire: {playerRadius: 50}
         }},
-        {size:16, distance: 0, text: 'test2b', color: '#ADD8E6', levelDownDistance: 80, }
+        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
     ]
 })
+
+mineData.push({
+    id: 'nl2',
+    coords: xy(450, 350),
+    wirable: 1,
+    words: [
+        {size:10, distance: 30, text: 'test node', triggers: {
+            wire: {playerRadius: 50}
+        }},
+        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
+    ]
+})
+
 
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)

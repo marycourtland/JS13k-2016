@@ -51,8 +51,6 @@ Triggers['spawn'] = function(player, mine, spawnData) {
 }
 
 // WIRING MINES TOGETHER
-// NB: the playerRadius property is how far we expect the OTHER player to be
-// from the OTHER wirable mine
 Triggers['wire'] = function(player, mine, data) {
     // ASSUMPTION: mine.wirable = true
     player.forEachWire(function(player2) {
@@ -61,7 +59,7 @@ Triggers['wire'] = function(player, mine, data) {
         if (!mine2.wirable) return;
         if (mine2.hasWireTo(mine)) return;
         if (mine.hasWireTo(mine2)) return;
-        if (distance(player2.coords, mine2.coords) > mine.playerRadius) return;
+        if (distance(player2.coords, mine2.coords) > Settings.playerWireRadius) return;
         console.log(
             'NEW WIRE: ',
             player.name + '|' + mine.id,

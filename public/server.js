@@ -135,7 +135,7 @@ for (var category in decorations) {
 var glitchy = [
     {
         id: 'g0',
-        coords: xy(450, 350),
+        coords: xy(550, 500),
         words: [
             {size:12, distance: 120, text: 'a shining speck of light',},
             {size:18, glitchLevel: 1, distance: 80, text: 'noise and chaos', triggers: {
@@ -248,7 +248,7 @@ mineData.push({
     coords: xy(300, 50),
     wirable: 1,
     words: [
-        {size:10, distance: 30, text: 'test1', triggers: {
+        {size:10, distance: 30, text: 'test power source', triggers: {
             setPower: 1,
             wire: {playerRadius: 50}
         }},
@@ -257,15 +257,28 @@ mineData.push({
 })
 mineData.push({
     id: 'nl1',
-    coords: xy(100, 300),
+    coords: xy(200, 200),
     wirable: 1,
     words: [
-        {size:10, distance: 30, text: 'test2', triggers: {
+        {size:10, distance: 30, text: 'test node', triggers: {
             wire: {playerRadius: 50}
         }},
-        {size:16, distance: 0, text: 'test2b', color: '#ADD8E6', levelDownDistance: 80, }
+        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
     ]
 })
+
+mineData.push({
+    id: 'nl2',
+    coords: xy(450, 350),
+    wirable: 1,
+    words: [
+        {size:10, distance: 30, text: 'test node', triggers: {
+            wire: {playerRadius: 50}
+        }},
+        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
+    ]
+})
+
 
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
@@ -526,23 +539,23 @@ Mine.prototype.trigger = function(player) {
 // TODO `CRUNCH: so.... this is the same as the Player.addWireTo method.
 // could stick the same method on the two prototypes
 Mine.prototype.addWireTo = function(mine2) {
-    console.log('*** ADDING WIRE')
     if (this.hasWireTo(mine2)) return;
+    //console.log(this.id, '*** ADDING WIRE')
     this.wires.push(mine2.id);
     this.game.emit('wire-add', {
         wire_id: getWireId(this.id, mine2.id)
     })
     this.emitUpdate();
     var self = this;
-    console.log('*** GOING TO PROPAGATE POWER DOWN WIRE')
+    //console.log(this.id, '*** GOING TO PROPAGATE POWER DOWN WIRE')
     setTimeout(function() {
-        console.log('*** PROPAGATING POWER DOWN WIRE')
+        //console.log(self.id, '*** PROPAGATING POWER DOWN WIRE')
         self.propagatePower();
-    }, 50)
+    }, 200)
 }
 
 Mine.prototype.powerUp = function() {
-    console.log('   POWERUP:', this.id)
+    //console.log(this.id, '   POWERUP:', this.id)
     if (!this.powered) this.powered = 0.5;
     this.game.emit('mine-powerup', {
         mine_index: this.index,
@@ -552,12 +565,15 @@ Mine.prototype.powerUp = function() {
 
 Mine.prototype.propagatePower = function() {
     var self = this;
-    console.log('---PROPAGATING POWER this.powered=' + self.powered + ' this.wires=' + JSON.stringify(this.wires));
     if (self.powered === 0) return;
+    //console.log(this.id, '---PROPAGATING POWER this.powered=' + self.powered + ' this.wires=' + JSON.stringify(this.wires));
     self.powerUp(); // emits update
     self.wires.forEach(function(mine_id) {
-        console.log('   PROPAGATION TO:', mine_id)
-        self.game.getMineById(mine_id).propagatePower(); 
+       // console.log(self.id,'   PROPAGATION TO:', mine_id)
+        var mine2 = self.game.getMineById(mine_id);
+        if (!!mine2.powered) return; // it probably already propagated
+        mine2.powerUp();
+        setTimeout(function() { mine2.propagatePower(); }, 200);
     })
 
 }
@@ -668,8 +684,6 @@ Triggers['spawn'] = function(player, mine, spawnData) {
 }
 
 // WIRING MINES TOGETHER
-// NB: the playerRadius property is how far we expect the OTHER player to be
-// from the OTHER wirable mine
 Triggers['wire'] = function(player, mine, data) {
     // ASSUMPTION: mine.wirable = true
     player.forEachWire(function(player2) {
@@ -678,7 +692,7 @@ Triggers['wire'] = function(player, mine, data) {
         if (!mine2.wirable) return;
         if (mine2.hasWireTo(mine)) return;
         if (mine.hasWireTo(mine2)) return;
-        if (distance(player2.coords, mine2.coords) > mine.playerRadius) return;
+        if (distance(player2.coords, mine2.coords) > Settings.playerWireRadius) return;
         console.log(
             'NEW WIRE: ',
             player.name + '|' + mine.id,

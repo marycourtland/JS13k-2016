@@ -21,7 +21,7 @@
         'mine-level-up': function(i) {
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
-            //if (mine.level === mine.words.length - 1) return; // no need
+            //if (mine.level === mine.words.length - 1) return; // TODO: Reintroduce this when mine data wonkiness is fixed. It prevents doublebounces etc.
             console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
 
@@ -117,6 +117,8 @@
 
             var levelledUp = (mine.level !== data.mine.level);
             var revealedMine = (!!mine.hidden && mine.hidden !== data.mine.hidden);
+
+            //console.log('>>> update_mine', mine.index, mine.id, levelledUp, mine.level, data.mine.level)
 
             // special effect: randomly popping newly revealed mines into view
             var delay = typeof data.delay === 'number' ? data.delay : (revealedMine) ? randFloat(1000) : 0;
