@@ -294,7 +294,13 @@ mineData.forEach(function(mine) {
 })
 // ======  server/game.js
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
+    var newbieCoords = xy(40, randInt(40, 440));
+    var newbie = new Player({
+        name: name,
+        game: this,
+        coords: newbieCoords,
+        checkpoint: newbieCoords // TODO: is this going to get mutated?
+    });
     newbie.socket = socket;
     // TODO: set player checkpoint?
     // TODO: also give players some coords 
@@ -302,7 +308,8 @@ Game.prototype.addPlayer = function(name, socket) {
     this.players.push(newbie);
 
     this.emit('player_joined', {
-        name: newbie.name
+        name: newbie.name,
+        data: newbie.data()
     })
 
     this.log('new player: ' + name);
@@ -356,6 +363,8 @@ Game.prototype.tick = function() {
             player.drainOxygen(Settings.oxygenDrain);
         })
     }
+
+    self.emit('tick', {}); // If we need a synchronized clock, send it here
 
     setTimeout(function() { self.tick(); }, Settings.tickTimeout)
 }
@@ -476,6 +485,14 @@ module.exports = function (socket) {
     socket.bind("player-update-coords", function(data) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
+
+        // todo: if we had the original nonvivified copy of the data,
+        // we could just cleanly forward it
+        payload.game.emit('player-update-coords', {
+            code: payload.game.code,
+            name: payload.player.name,
+            coords: payload.coords
+        })
         
         // TODO: broadcast player coords to everyone, for nice position syncing. Maybe in the tick function
     })

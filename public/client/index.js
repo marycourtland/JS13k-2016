@@ -4,6 +4,7 @@
     window.g = window.g || {};
     g.me = null;
     g.game = null;
+    g.errors = {}; // network errors
 
     // for the game intro
     var inputs = {
@@ -93,6 +94,11 @@
 
     // signals from server
     var listeners = {
+        'tick': function() {
+            // MASTER GAME SYNCHRONIZATION TICK *********
+            g.actions['player-update-coords'](); 
+        },
+
         'player_joined': function(data) {
             // expect: data.game, data.name
             if (data.name === inputs.name) {
@@ -101,7 +107,7 @@
             }
             else {
                 // TODO: aggregate the listening for game updates
-                var newbie = new Player({name: data.name, game: g.game});
+                var newbie = new Player(data.data);
                 g.game.players.push(newbie);
                 g.views.renderSidebar();
                 g.views.renderPlayer(newbie);
@@ -141,6 +147,24 @@
         'player-move-stop': function(data) {
             if (data.name !== g.me.name) 
                 g.game.getPlayer(data.name).stopMove(data.move_id);
+        },
+
+        'player-update-coords': function(data) {
+            if (data.name === g.me.name) return; 
+            var player = g.game.getPlayer(data.name);
+
+            var dist = distance(data.coords, player.coords);
+            var offset = V.subtract(data.coords, player.coords);
+            var correction = V.scale(offset, 0.02);
+            
+            g.errors[player.name] = correction;
+
+            //console.log('COORDS ERROR for', player.name);
+            //console.log('     ' + JSON.stringify(V.round(data.coords, 2)));
+            //console.log('     ' + JSON.stringify(V.round(player.coords, 2)));
+            //console.log('     ' + JSON.stringify(V.round(correction, 2)));
+            //console.log(['coords', data.coords.x, data.coords.y, '|', player.coords.x, player.coords.y].join('\t'))
+            console.log(['xyerror', offset.x, offset.y].join('\t') + '\n');
         },
 
         'player-update': function(data) {

@@ -54,7 +54,6 @@ Game.prototype.data = function() {
 }
 
 Game.prototype.serialize = function() {
-    var d = this.data();
     return JSON.stringify(this.data());
 }
 

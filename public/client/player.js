@@ -1,15 +1,16 @@
-
-
 Player.prototype.isMe = function() {
     return this.name === g.me.name;
 }
 
 Player.prototype.move = function(dir) {
-    // dir should be coords
-    this.coords.x += dir.x * Settings.velocity;
-    this.coords.y += dir.y * Settings.velocity;
+    // error correct for network crap
+    var errorCorrection = (this.name in g.errors ? g.errors[this.name] : xy(0, 0));
+    this.coords.x += dir.x * Settings.velocity + (errorCorrection.x || 0);
+    this.coords.y += dir.y * Settings.velocity + (errorCorrection.y || 0);
+
     this.checkMargin();
     this.checkWires();
+
     g.game.updateMines(g.me);
     g.views.updatePlayer(this);
 }

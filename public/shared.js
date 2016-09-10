@@ -63,7 +63,6 @@ Game.prototype.data = function() {
 }
 
 Game.prototype.serialize = function() {
-    var d = this.data();
     return JSON.stringify(this.data());
 }
 
@@ -151,6 +150,20 @@ V.rth = function(r, theta) {
     )
 }
 
+V.scale = function(p, c) {
+    return xy(
+        p.x * c,
+        p.y * c
+    )
+}
+
+V.round = function(p, decimals) {
+    var f = Math.pow(10, decimals);
+    return xy(
+        Math.round(p.x * f)/f,
+        Math.round(p.y * f)/f
+    )
+}
 // ======  shared/mine.js
 // Each word data looks like:
 // {
@@ -250,7 +263,7 @@ Player.prototype.updateFromData = function(data) {
     this.game = data.game;
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
-    this.coords = data.coords || xy(40, randInt(40, 440));
+    this.coords = data.coords || xy(40, 40);
     this.mineState = data.mineState || {};
     this.oxygen = (typeof data.oxygen === 'number') ? data.oxygen : 1;
     this.wires = data.wires || [];
@@ -312,8 +325,8 @@ Player.prototype.lastTriggeredMine = function(callback) {
 var Settings = {};
 
 // SERVER SIDE ==============================
-Settings.tickTimeout = 5000; // ms
-Settings.oxygenDrain = 0.05; // player will die in 20 ticks
+Settings.tickTimeout = 1000; // ms
+Settings.oxygenDrain = 0.005; // player will die in 20 ticks
 Settings.glitchPerDeath = 1;
 Settings.playerWireRadius = 50; // if the player on the other side is closer than that, make a wire
 
@@ -340,7 +353,7 @@ function setupSocket(socket) {
     socket.bind = function(signal, callback) {
         callback = ensureFunction(callback);
         socket.on(signal, function() {
-//            console.log(socket.id + ' > ' + signal);
+            console.log(socket.id + ' > ' + signal);
             callback.apply(null, arguments);
         })
     }

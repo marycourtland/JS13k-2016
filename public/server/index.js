@@ -89,6 +89,14 @@ module.exports = function (socket) {
     socket.bind("player-update-coords", function(data) {
         var payload = vivify(data, socket);
         payload.player.coords = payload.coords;
+
+        // todo: if we had the original nonvivified copy of the data,
+        // we could just cleanly forward it
+        payload.game.emit('player-update-coords', {
+            code: payload.game.code,
+            name: payload.player.name,
+            coords: payload.coords
+        })
         
         // TODO: broadcast player coords to everyone, for nice position syncing. Maybe in the tick function
     })

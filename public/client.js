@@ -136,6 +136,7 @@ window.$ = function(id) {
     window.g = window.g || {};
     g.me = null;
     g.game = null;
+    g.errors = {}; // network errors
 
     // for the game intro
     var inputs = {
@@ -225,6 +226,11 @@ window.$ = function(id) {
 
     // signals from server
     var listeners = {
+        'tick': function() {
+            // MASTER GAME SYNCHRONIZATION TICK *********
+            g.actions['player-update-coords'](); 
+        },
+
         'player_joined': function(data) {
             // expect: data.game, data.name
             if (data.name === inputs.name) {
@@ -233,7 +239,7 @@ window.$ = function(id) {
             }
             else {
                 // TODO: aggregate the listening for game updates
-                var newbie = new Player({name: data.name, game: g.game});
+                var newbie = new Player(data.data);
                 g.game.players.push(newbie);
                 g.views.renderSidebar();
                 g.views.renderPlayer(newbie);
@@ -273,6 +279,24 @@ window.$ = function(id) {
         'player-move-stop': function(data) {
             if (data.name !== g.me.name) 
                 g.game.getPlayer(data.name).stopMove(data.move_id);
+        },
+
+        'player-update-coords': function(data) {
+            if (data.name === g.me.name) return; 
+            var player = g.game.getPlayer(data.name);
+
+            var dist = distance(data.coords, player.coords);
+            var offset = V.subtract(data.coords, player.coords);
+            var correction = V.scale(offset, 0.02);
+            
+            g.errors[player.name] = correction;
+
+            //console.log('COORDS ERROR for', player.name);
+            //console.log('     ' + JSON.stringify(V.round(data.coords, 2)));
+            //console.log('     ' + JSON.stringify(V.round(player.coords, 2)));
+            //console.log('     ' + JSON.stringify(V.round(correction, 2)));
+            //console.log(['coords', data.coords.x, data.coords.y, '|', player.coords.x, player.coords.y].join('\t'))
+            console.log(['xyerror', offset.x, offset.y].join('\t') + '\n');
         },
 
         'player-update': function(data) {
@@ -418,18 +442,19 @@ Mine.prototype.interpolateSize = function(distance, i) {
     return Math.max(word.size, word.size + (nextWord.size - word.size) * progress)
 }
 // ======  client/player.js
-
-
 Player.prototype.isMe = function() {
     return this.name === g.me.name;
 }
 
 Player.prototype.move = function(dir) {
-    // dir should be coords
-    this.coords.x += dir.x * Settings.velocity;
-    this.coords.y += dir.y * Settings.velocity;
+    // error correct for network crap
+    var errorCorrection = (this.name in g.errors ? g.errors[this.name] : xy(0, 0));
+    this.coords.x += dir.x * Settings.velocity + (errorCorrection.x || 0);
+    this.coords.y += dir.y * Settings.velocity + (errorCorrection.y || 0);
+
     this.checkMargin();
     this.checkWires();
+
     g.game.updateMines(g.me);
     g.views.updatePlayer(this);
 }
@@ -721,6 +746,7 @@ g.views.addWire = function(id, coordsA, coordsB) {
     var pathHtml = g.views.makeLine(id, coordList);
     g.views.wires[id] = pathHtml;
     g.views.renderWires();
+    pathHtml = pathHtml.replace('NaN', '0'); // lol
     return pathHtml;
 }
 

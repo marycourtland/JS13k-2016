@@ -62,3 +62,17 @@ V.rth = function(r, theta) {
     )
 }
 
+V.scale = function(p, c) {
+    return xy(
+        p.x * c,
+        p.y * c
+    )
+}
+
+V.round = function(p, decimals) {
+    var f = Math.pow(10, decimals);
+    return xy(
+        Math.round(p.x * f)/f,
+        Math.round(p.y * f)/f
+    )
+}

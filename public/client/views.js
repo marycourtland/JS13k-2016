@@ -223,6 +223,7 @@ g.views.addWire = function(id, coordsA, coordsB) {
     var pathHtml = g.views.makeLine(id, coordList);
     g.views.wires[id] = pathHtml;
     g.views.renderWires();
+    pathHtml = pathHtml.replace('NaN', '0'); // lol
     return pathHtml;
 }
 

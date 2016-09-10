@@ -1,5 +1,11 @@
 Game.prototype.addPlayer = function(name, socket) {
-    var newbie = new Player({name: name, game: this, checkpoint: xy(200,50)});
+    var newbieCoords = xy(40, randInt(40, 440));
+    var newbie = new Player({
+        name: name,
+        game: this,
+        coords: newbieCoords,
+        checkpoint: newbieCoords // TODO: is this going to get mutated?
+    });
     newbie.socket = socket;
     // TODO: set player checkpoint?
     // TODO: also give players some coords 
@@ -7,7 +13,8 @@ Game.prototype.addPlayer = function(name, socket) {
     this.players.push(newbie);
 
     this.emit('player_joined', {
-        name: newbie.name
+        name: newbie.name,
+        data: newbie.data()
     })
 
     this.log('new player: ' + name);
@@ -61,6 +68,8 @@ Game.prototype.tick = function() {
             player.drainOxygen(Settings.oxygenDrain);
         })
     }
+
+    self.emit('tick', {}); // If we need a synchronized clock, send it here
 
     setTimeout(function() { self.tick(); }, Settings.tickTimeout)
 }
