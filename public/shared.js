@@ -195,7 +195,9 @@ Mine.prototype.updateFromData = function(data) {
     this.levelDownDistance = data.levelDownDistance || 0;
     this.powered = 0;
 
-    // `crunch also populate words with default data (like glitchLevel=0)
+    this.words.forEach(function(w) {
+        w.glitchLevel = w.glitchLevel || 0;
+    })
 }
 
 Mine.prototype.data = function() {
@@ -341,7 +343,7 @@ Settings.velocity = 5;
 
 // wireNear and wireFar control when player wires form and break
 Settings.wireNear = 30; // pixels
-Settings.wireFar = 600; // pixels, as the crow flies 
+Settings.wireFar = 800; // pixels, as the crow flies 
 // ======  shared/socket.js
 function setupSocket(socket) {
     var _emit = socket.emit;

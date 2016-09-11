@@ -17,4 +17,4 @@ Settings.velocity = 5;
 
 // wireNear and wireFar control when player wires form and break
 Settings.wireNear = 30; // pixels
-Settings.wireFar = 600; // pixels, as the crow flies 
+Settings.wireFar = 800; // pixels, as the crow flies 

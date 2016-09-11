@@ -26,6 +26,13 @@ window.$ = function(id) {
 
     $el.removeClass = function(c) {
         $el.className = $el.className.replace(c, '').replace('  ', ' ');
+        return this;
+    }
+
+    $el.addClass = function(c) {
+        // prevent duplicate classes
+        if (!$el.className.match(c)) $el.className = $el.className + ' ' + c;
+        return this;
     }
 
 

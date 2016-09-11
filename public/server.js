@@ -32,71 +32,48 @@ for (var i = 0; i < checkpoints.length; i++) {
     })
 }
 
-var landmarks = [
-    {
-        id: 'l0',
-        coords: {x:960,y:270},
-        words: [
-            //{size: 36, glitchLevel:0, distance: 400, text:'an\norbiting\nmass'},
-            {size: 24, glitchLevel:0, distance: 400, text:'a ruined\nspace station'},
-            //{size: 36, glitchLevel:0, distance: 200, text:'one functioning port', pbatch:'ss', triggers: {'checkpoint': 1}},
-            {size: 48, glitchLevel:0, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
-              'checkpoint': 1,
-              'showArea': 'spacestation',
-              'hideArea': 'outside'
-            }},
-            {size: 48, glitchLevel:0, distance: 10, text:'inside the\nspace station'}
-        ]
-    },
-    {
-        id: 'l1',
-        coords: {x:2180,y:220},
-        wirable: 1,
-        words: [
-            {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'master power control', triggers: {setPower: 1}},
-            {size: 28, glitchLevel:0, distance: 30, text:'master power on', triggers: {wire: {playerRadius: 50}}},
-        ]
-    },
-    {
-        id: 'l2',
-        coords: {x:2480,y:440},
-        wirable: 1,
-        words: [
-            {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
-            {size: 28, glitchLevel:0, distance: 30, text:'life support\n powered up'},
-        ]
-    },
-    {
-        id: 'l3',
-        coords: {x:2820,y:300},
-        wirable: 1,
-        words: [
-            {size: 14, glitchLevel:0, distance: 300, text:'a control panel'},
-            {size: 20, glitchLevel:0, distance: 100, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}}},
-            {size: 28, glitchLevel:0, distance: 30, text:'shuttle\n powered up'},
-        ]
-    },
-    {
-        id: 'l4',
-        coords: {x:3400,y:400},
-        words: [
-            {size: 14, glitchLevel:0, distance: 300, text:'a round porthole'},
-            {size: 28, glitchLevel:0, distance: 100, text:'escape shuttle entrance', triggers: {'win': 1}},
-            {size: 72, glitchLevel:0, distance: 30, text:'blasting away\nto safety'},
-        ]
-    }
-]
-mineData = mineData.concat(landmarks);
+tests = [];
+tests.push({
+    id: 'nl0',
+    coords: xy(300, 50),
+    wirable: 1,
+    words: [
+        {size:10, distance: 30, text: 'test power source', triggers: {
+            setPower: 1,
+            wire: {playerRadius: 50}
+        }}
+    ]
+})
+tests.push({
+    id: 'nl1',
+    coords: xy(200, 200),
+    wirable: 1,
+    words: [
+        {size:10, distance: 30, text: 'test node', triggers: {
+            wire: {playerRadius: 50}
+        }}
+    ]
+})
+
+tests.push({
+    id: 'nl2',
+    coords: xy(450, 350),
+    wirable: 1,
+    words: [
+        {size:10, distance: 30, text: 'test node', triggers: {
+            wire: {playerRadius: 50}
+        }}
+    ]
+})
+
 
 
 // Decoration templates
 var decorations = {
     'A': {
         template: [
-            {size: 10, glitchLevel:0, distance: 80, text:'space junk'},
-            {size: 14, glitchLevel:0, distance: 10,  text:'more detail'}
+            {size: 10, distance: 80, text:'space junk'},
+            {size: 14, distance: 10,  text:'more detail'}
         ],
         coords: [
             //{x:120,y:280},
@@ -109,8 +86,8 @@ var decorations = {
     },
     'B': {
         template: [
-            {size: 10, glitchLevel:0, distance: 50, text:'a doodad'},
-            {size: 14, glitchLevel:0, distance: 10, text:'something interesting'}
+            {size: 10, distance: 50, text:'a doodad'},
+            {size: 14, distance: 10, text:'something interesting'}
         ],
         coords: [
             {x:1340,y:140},
@@ -123,6 +100,7 @@ var decorations = {
 
 for (var category in decorations) {
     for (var i = 0; i < decorations[category].coords.length; i++) {
+        continue;
         mineData.push({
             id: 'd' + category + i,
             coords: decorations[category].coords[i],
@@ -158,8 +136,8 @@ var glitchy = [
         id: 'g1',
         coords: {x:1950,y:490},
         words: [
-            {size: 10, glitchLevel:0, distance: 100, text:'a doodad'},
-            {size: 12, glitchLevel:0, distance: 80, text:'quite interesting', triggers: {'death': 1}},
+            {size: 10, distance: 100, text:'a doodad'},
+            {size: 12, distance: 80, text:'quite interesting', triggers: {'death': 1}},
             {size: 14, glitchLevel:1, distance: 50, text:'DANGER', triggers: {
               'death': 1,
               'spawn': {
@@ -243,7 +221,8 @@ templates.debris = function (params) {
 }
 
 // TESTING - nonlevelling mines
-mineData.push({
+tests = [];
+tests.push({
     id: 'nl0',
     coords: xy(300, 50),
     wirable: 1,
@@ -251,38 +230,99 @@ mineData.push({
         {size:10, distance: 30, text: 'test power source', triggers: {
             setPower: 1,
             wire: {playerRadius: 50}
-        }},
-        //{size:16, distance: 0, text: 'test1b', color: '#ADD8E6', levelDownDistance: 80}
+        }}
     ]
 })
-mineData.push({
+tests.push({
     id: 'nl1',
     coords: xy(200, 200),
     wirable: 1,
     words: [
         {size:10, distance: 30, text: 'test node', triggers: {
             wire: {playerRadius: 50}
-        }},
-        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
+        }}
     ]
 })
 
-mineData.push({
+tests.push({
     id: 'nl2',
     coords: xy(450, 350),
     wirable: 1,
     words: [
         {size:10, distance: 30, text: 'test node', triggers: {
             wire: {playerRadius: 50}
-        }},
-        {size:16, distance: 0, text: 'test node', color: '#ADD8E6', levelDownDistance: 80, }
+        }}
     ]
 })
 
 
+//var landmarks = [
+mineData = [
+    {
+        id: 'l0',
+        coords: {x:960,y:270},
+        coords: {x:380,y:220},
+        words: [
+            //{size: 36, distance: 400, text:'an\norbiting\nmass'},
+            {size: 24, distance: 400, text:'an abandoned\nspace station'},
+            //{size: 36, distance: 200, text:'one functioning port', pbatch:'ss', triggers: {'checkpoint': 1}},
+            {size: 36, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
+              'checkpoint': 1,
+              'showArea': 'spacestation',
+              'hideArea': 'outside'
+            }},
+            {size: 36, distance: 10, text:'inside the\nspace station'}
+        ]
+    },
+    {
+        id: 'l1',
+        coords: {x:2180,y:220},
+        coords: {x:800,y:220},
+        wirable: 1,
+        words: [
+            {size: 14, distance: 100, text:'a control panel'},
+            {size: 20, distance: 50, text:'master power control', triggers: {setPower: 1}},
+            {size: 28, distance: 30, text:'master power on', triggers: {wire: {playerRadius: 50}}},
+        ]
+    },
+    {
+        id: 'l2',
+        coords: {x:2480,y:440},
+        coords: {x:1280,y:440},
+        wirable: 1,
+        words: [
+            {size: 14, distance: 300, text:'a control panel'},
+            {size: 20, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
+            {size: 28, distance: 30, text:'life support\n powered up'},
+        ]
+    },
+    {
+        id: 'l3',
+        coords: {x:2820,y:300},
+        coords: {x:1620,y:300},
+        wirable: 1,
+        words: [
+            {size: 14, distance: 300, text:'a control panel'},
+            {size: 20, distance: 100, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}}},
+            {size: 28, distance: 30, text:'shuttle\n powered up'},
+        ]
+    },
+    {
+        id: 'l4',
+        coords: {x:3400,y:400},
+        coords: {x:2000,y:400},
+        words: [
+            {size: 14, distance: 300, text:'a round porthole'},
+            {size: 28, distance: 100, text:'escape shuttle entrance', triggers: {'win': 1}},
+            {size: 72, distance: 30, text:'blasting away\nto safety'},
+        ]
+    }
+]
+//mineData = mineData.concat(landmarks);
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
 mineData.forEach(function(mine) {
+  return;
     if (!!mine.area) return;
     if (mine.coords.x < 960) {
         mine.area = 'outside';
@@ -291,6 +331,20 @@ mineData.forEach(function(mine) {
         mine.area = 'spacestation';
         mine.hidden = 1;
     }
+})
+
+// Append a terminal word to each mine to make things clean
+mineData.forEach(function(mine) {
+    var lastWord = mine.words[mine.words.length - 1];
+    var terminal = {
+        distance: -1, // never trigger it
+        text: lastWord.text
+    }
+    var props = ['color', 'size', 'glitchLevel'];
+    props.forEach(function(prop) {
+      if (lastWord[prop]) terminal[prop] = lastWord[prop];
+    })
+    mine.words.push(terminal);
 })
 // ======  server/game.js
 Game.prototype.addPlayer = function(name, socket) {

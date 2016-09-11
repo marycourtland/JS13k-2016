@@ -93,7 +93,7 @@
 
 
     // signals from server
-    var listeners = {
+    g.listeners = {
         'tick': function() {
             // MASTER GAME SYNCHRONIZATION TICK *********
             g.actions['player-update-coords'](); 
@@ -255,7 +255,7 @@
             $('error').text(data);
         }) 
 
-        for (var signal in listeners) socket.bind(signal, listeners[signal])
+        for (var signal in g.listeners) socket.bind(signal, g.listeners[signal])
     }
 
     function onLoad() {

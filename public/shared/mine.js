@@ -28,7 +28,9 @@ Mine.prototype.updateFromData = function(data) {
     this.levelDownDistance = data.levelDownDistance || 0;
     this.powered = 0;
 
-    // `crunch also populate words with default data (like glitchLevel=0)
+    this.words.forEach(function(w) {
+        w.glitchLevel = w.glitchLevel || 0;
+    })
 }
 
 Mine.prototype.data = function() {

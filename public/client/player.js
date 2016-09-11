@@ -8,7 +8,7 @@ Player.prototype.move = function(dir) {
     this.coords.x += dir.x * Settings.velocity + (errorCorrection.x || 0);
     this.coords.y += dir.y * Settings.velocity + (errorCorrection.y || 0);
 
-    this.checkMargin();
+    if (this.name === g.me.name) this.checkMargin();
     this.checkWires();
 
     g.game.updateMines(g.me);
@@ -30,13 +30,23 @@ Player.prototype.checkWires = function() {
         if (p.name === self.name) return;
 
         var d = distance(p.coords, self.coords);
-        if (!self.hasWireTo(p)) {
+        var hasWire = self.hasWireTo(p);
+        var wire_id = getWireId(p.name, this.name);
+
+        if (d < Settings.wireNear) {
             // No wire exists yet. Check for new wire.
             // todo: this could be optimized by checking large grained rectangular distance 
-            if (d < Settings.wireNear) g.actions['player-meet'](p);
+            if (!hasWire) {
+                g.actions['player-meet'](p);
+            }
+            else if (!(wire_id in g.views.wires)) {
+                // bugfix. Only do this when players are meeting so that it pretends to make sense.
+                g.listeners['wire-add']({wire_id: wire_id});
+            }
         }
-        else {
-            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
+        
+        if (d > Settings.wireFar && hasWire) {
+            g.actions['player-snap'](p, true);
         }
     })
 }

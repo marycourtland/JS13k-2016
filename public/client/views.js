@@ -76,7 +76,7 @@ g.views.poweredMines = {}; // master list.
 
 g.views.renderMine = function(index) {
     var $mine = $(document.createElement('div'));
-    $mine.className = 'mine';
+    $mine.addClass('mine');
     $mine.id = 'mine-' + index;
     $('gameplay').appendChild($mine); 
     g.views.updateMine(index);
@@ -87,9 +87,11 @@ g.views.updateMine = function(index, size) {
     if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
+    if (mine.wirable) $mine.addClass('wirable');
+
 
     if (g.views.poweredMines[mine.id]) {
-        if (!$mine.className.match(/powered/)) $mine.className += ' powered';
+        $mine.addClass('powered');
     } 
     else {
         $mine.removeClass('powered');
@@ -129,8 +131,7 @@ g.views.bounce = function($el) {
     var s = parseInt($el.style.fontSize);
     $el.bouncing = true;
     if ($el.className.match(/bounce/)) return;
-    $el.className += ' bounce';
-    $el.css({'fontSize': s*1.5 + 'px'}) 
+    $el.addClass('bounce').css({'fontSize': s*1.5 + 'px'}) 
 
     setTimeout(function() {
         $el.css({'fontSize': s + 'px'});
@@ -147,8 +148,7 @@ g.views.bounce = function($el) {
 g.views.renderPlayer = function(player) {
     player = player || g.me;
     var $player = $(document.createElement('div'));
-    $player.className = 'player';
-    $player.id = 'player-' + player.name;
+    $player.addClass('player').id = 'player-' + player.name;
     $('gameplay').appendChild($player); 
     g.views.updatePlayer(player);
 }
@@ -220,19 +220,26 @@ g.views.addWire = function(id, coordsA, coordsB) {
     //coordList.push(V.add(coordList[2], v1));
     coordList.push(coordsB);
 
-    var pathHtml = g.views.makeLine(id, coordList);
+    var pathHtml = g.views.makeLine(id, coordList, '#ABE3A1')
+
     g.views.wires[id] = pathHtml;
     g.views.renderWires();
     pathHtml = pathHtml.replace('NaN', '0'); // lol
     return pathHtml;
 }
 
-g.views.makeLine = function(id, coordList) {
+g.views.makeLine = function(id, coordList, color) {
     var pathString = 'M' + coordList.map(function(coords) { return coords.x + ' ' + coords.y; }).join(' L ');
 
     // SVG is finnicky. Have to set the inner html.
     //var pathString = "M" + [coords1.x, coords1.y, 'L', coords2.x, coords2.y, 'Z'].join(' ');
-    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="3" stroke="white" opacity="0.1" fill="transparent"></path>';
+    function line(opacity, strokeWidth) {
+        return '<path d="' + pathString + '" stroke-width="' + strokeWidth.toString() + '" stroke="' + color + '" opacity="' + opacity.toString() + '" fill="transparent"></path>';
+    }
+    var pathHtml = line(0.1, 8);
+    pathHtml += line(0.3, 4);
+    pathHtml += line(0.5, 2);
+    pathHtml += line(0.6, 1);
 
     return pathHtml;
 }

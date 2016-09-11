@@ -123,6 +123,13 @@ window.$ = function(id) {
 
     $el.removeClass = function(c) {
         $el.className = $el.className.replace(c, '').replace('  ', ' ');
+        return this;
+    }
+
+    $el.addClass = function(c) {
+        // prevent duplicate classes
+        if (!$el.className.match(c)) $el.className = $el.className + ' ' + c;
+        return this;
     }
 
 
@@ -225,7 +232,7 @@ window.$ = function(id) {
 
 
     // signals from server
-    var listeners = {
+    g.listeners = {
         'tick': function() {
             // MASTER GAME SYNCHRONIZATION TICK *********
             g.actions['player-update-coords'](); 
@@ -387,7 +394,7 @@ window.$ = function(id) {
             $('error').text(data);
         }) 
 
-        for (var signal in listeners) socket.bind(signal, listeners[signal])
+        for (var signal in g.listeners) socket.bind(signal, g.listeners[signal])
     }
 
     function onLoad() {
@@ -452,7 +459,7 @@ Player.prototype.move = function(dir) {
     this.coords.x += dir.x * Settings.velocity + (errorCorrection.x || 0);
     this.coords.y += dir.y * Settings.velocity + (errorCorrection.y || 0);
 
-    this.checkMargin();
+    if (this.name === g.me.name) this.checkMargin();
     this.checkWires();
 
     g.game.updateMines(g.me);
@@ -474,13 +481,23 @@ Player.prototype.checkWires = function() {
         if (p.name === self.name) return;
 
         var d = distance(p.coords, self.coords);
-        if (!self.hasWireTo(p)) {
+        var hasWire = self.hasWireTo(p);
+        var wire_id = getWireId(p.name, this.name);
+
+        if (d < Settings.wireNear) {
             // No wire exists yet. Check for new wire.
             // todo: this could be optimized by checking large grained rectangular distance 
-            if (d < Settings.wireNear) g.actions['player-meet'](p);
+            if (!hasWire) {
+                g.actions['player-meet'](p);
+            }
+            else if (!(wire_id in g.views.wires)) {
+                // bugfix. Only do this when players are meeting so that it pretends to make sense.
+                g.listeners['wire-add']({wire_id: wire_id});
+            }
         }
-        else {
-            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
+        
+        if (d > Settings.wireFar && hasWire) {
+            g.actions['player-snap'](p, true);
         }
     })
 }
@@ -599,7 +616,7 @@ g.views.poweredMines = {}; // master list.
 
 g.views.renderMine = function(index) {
     var $mine = $(document.createElement('div'));
-    $mine.className = 'mine';
+    $mine.addClass('mine');
     $mine.id = 'mine-' + index;
     $('gameplay').appendChild($mine); 
     g.views.updateMine(index);
@@ -610,9 +627,11 @@ g.views.updateMine = function(index, size) {
     if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
+    if (mine.wirable) $mine.addClass('wirable');
+
 
     if (g.views.poweredMines[mine.id]) {
-        if (!$mine.className.match(/powered/)) $mine.className += ' powered';
+        $mine.addClass('powered');
     } 
     else {
         $mine.removeClass('powered');
@@ -652,8 +671,7 @@ g.views.bounce = function($el) {
     var s = parseInt($el.style.fontSize);
     $el.bouncing = true;
     if ($el.className.match(/bounce/)) return;
-    $el.className += ' bounce';
-    $el.css({'fontSize': s*1.5 + 'px'}) 
+    $el.addClass('bounce').css({'fontSize': s*1.5 + 'px'}) 
 
     setTimeout(function() {
         $el.css({'fontSize': s + 'px'});
@@ -670,8 +688,7 @@ g.views.bounce = function($el) {
 g.views.renderPlayer = function(player) {
     player = player || g.me;
     var $player = $(document.createElement('div'));
-    $player.className = 'player';
-    $player.id = 'player-' + player.name;
+    $player.addClass('player').id = 'player-' + player.name;
     $('gameplay').appendChild($player); 
     g.views.updatePlayer(player);
 }
@@ -743,19 +760,26 @@ g.views.addWire = function(id, coordsA, coordsB) {
     //coordList.push(V.add(coordList[2], v1));
     coordList.push(coordsB);
 
-    var pathHtml = g.views.makeLine(id, coordList);
+    var pathHtml = g.views.makeLine(id, coordList, '#ABE3A1')
+
     g.views.wires[id] = pathHtml;
     g.views.renderWires();
     pathHtml = pathHtml.replace('NaN', '0'); // lol
     return pathHtml;
 }
 
-g.views.makeLine = function(id, coordList) {
+g.views.makeLine = function(id, coordList, color) {
     var pathString = 'M' + coordList.map(function(coords) { return coords.x + ' ' + coords.y; }).join(' L ');
 
     // SVG is finnicky. Have to set the inner html.
     //var pathString = "M" + [coords1.x, coords1.y, 'L', coords2.x, coords2.y, 'Z'].join(' ');
-    var pathHtml = '<path id="' + id + '" d="' + pathString + '" stroke-width="3" stroke="white" opacity="0.1" fill="transparent"></path>';
+    function line(opacity, strokeWidth) {
+        return '<path d="' + pathString + '" stroke-width="' + strokeWidth.toString() + '" stroke="' + color + '" opacity="' + opacity.toString() + '" fill="transparent"></path>';
+    }
+    var pathHtml = line(0.1, 8);
+    pathHtml += line(0.3, 4);
+    pathHtml += line(0.5, 2);
+    pathHtml += line(0.6, 1);
 
     return pathHtml;
 }
