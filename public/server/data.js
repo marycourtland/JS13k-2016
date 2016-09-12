@@ -185,11 +185,10 @@ templates.debris = function (params) {
 }
 
 
-//var landmarks = [
 mineData = [
     {
         id: 'l0',
-        coords: {x:380,y:220},
+        coords: {x:720,y:150},
         words: [
             {size: 24, distance: 70, text:'entry to\nan abandoned\nspace station', pbatch:'ss'},
             {size: 24, distance: 70, text:'entry to\nan abandoned\nspace station\n[+][ ]', pbatch:'ss', triggers: {
@@ -203,7 +202,7 @@ mineData = [
     {
         id: 'l1',
         area: 'spacestation',
-        coords: {x:1000,y:220},
+        coords: {x:1300,y:220},
         wirable: 1,
         words: [
             {size: 14, distance: 100, text:'$cover'},
@@ -214,7 +213,7 @@ mineData = [
     {
         id: 'l2',
         area: 'spacestation',
-        coords: {x:1580,y:440},
+        coords: {x:1880,y:440},
         wirable: 1,
         words: [
             {size: 14, distance: 300, text:'$cover'},
@@ -225,7 +224,7 @@ mineData = [
     {
         id: 'l3',
         area: 'spacestation',
-        coords: {x:1680,y:120},
+        coords: {x:1980,y:120},
         wirable: 1,
         words: [
             {size: 14, distance: 300, text:'$cover'},
@@ -236,7 +235,7 @@ mineData = [
     {
         id: 'l3',
         area: 'spacestation',
-        coords: {x:2320,y:350},
+        coords: {x:2620,y:350},
         wirable: 1,
         words: [
             {size: 14, distance: 300, text:'$cover'},
@@ -248,7 +247,7 @@ mineData = [
         id: 'l4',
         area: 'end',
         hidden: 1,
-        coords: {x:2400,y:200},
+        coords: {x:2700,y:200},
         words: [
             {size: 14, distance: 300, text:'a cylindrical airlock'},
             {size: 28, distance: 100, text:'escape shuttle entrance\n[ ][ ]', pbatch:'end'},
@@ -257,6 +256,31 @@ mineData = [
         ]
     }
 ]
+
+var instructions = [
+    [xy(200, 180), 'how to play:'],
+    [xy(350, 250), '1.\nmove with arrow keys'],
+    [xy(280, 380), '2.\nmeet your teammates\nto create wires'],
+    [xy(600, 500), '3.\nplace both ends of the wire\n on two systems\nto connect them together'],
+    [xy(800, 350), 'find & power up the shuttle\nso you can escape home!', '#466253'],
+    [xy(1100, 480), 'do not run\nout of oxygen.', '#504247'],
+]
+for (var i = 0; i < instructions.length; i++) {
+    mineData.push({
+        id: 'instructions' + i,
+        coords: instructions[i][0],
+        words: [{size: 16, distance: 0, color: instructions[i][2] || '#465462', text: instructions[i][1]}]
+    })
+}
+    
+    
+            var s = 'how to play:'
+              + '\nmove with arrow keys'
+              + '\nmeet your teammates to create wires'
+              + "\ntwo players can simultaneously connect two systems together if they're holding a wire"
+              + '\ndo not run out of oxygen'
+              + '\nfind the shuttle, power it up, and escape!'
+    
 //mineData = mineData.concat(landmarks);
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
