@@ -328,8 +328,10 @@ window.$ = function(id) {
 
         'wire-remove': function(data) {
             var wire_id = getWireId(data.player1, data.player2);
-            g.game.getPlayer(data.player1).removeWire(data.player2);
-            g.game.getPlayer(data.player2).removeWire(data.player1);
+            var p1 = g.game.getPlayer(data.player1);
+            var p2 = g.game.getPlayer(data.player2);
+            p1.removeWire(p2);
+            p2.removeWire(p1);
             g.views.removeWire(wire_id); 
         },
 
@@ -479,6 +481,15 @@ Player.prototype.checkWires = function() {
     if (self.name !== g.me.name) return;
     g.game.eachPlayer(function(p) {
         if (p.name === self.name) return;
+
+        var d = distance(p.coords, self.coords);
+        if (!self.hasWireTo(p)) {
+            if (d < Settings.wireNear) g.actions['player-meet'](p);
+        }
+        else {
+            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
+        }
+return;
 
         var d = distance(p.coords, self.coords);
         var hasWire = self.hasWireTo(p);

@@ -262,10 +262,9 @@ mineData = [
         coords: {x:960,y:270},
         coords: {x:380,y:220},
         words: [
-            //{size: 36, distance: 400, text:'an\norbiting\nmass'},
-            {size: 24, distance: 400, text:'an abandoned\nspace station'},
+            {size: 24, distance: 50, text:'entry to\nan abandoned\nspace station'},
             //{size: 36, distance: 200, text:'one functioning port', pbatch:'ss', triggers: {'checkpoint': 1}},
-            {size: 36, distance: 200, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
+            {size: 36, distance: 20, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
               'checkpoint': 1,
               'showArea': 'spacestation',
               'hideArea': 'outside'
@@ -291,7 +290,7 @@ mineData = [
         wirable: 1,
         words: [
             {size: 14, distance: 300, text:'a control panel'},
-            {size: 20, distance: 100, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
+            {size: 20, distance: 100, requirePower: 1, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
             {size: 28, distance: 30, text:'life support\n powered up'},
         ]
     },
@@ -302,14 +301,16 @@ mineData = [
         wirable: 1,
         words: [
             {size: 14, distance: 300, text:'a control panel'},
-            {size: 20, distance: 100, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}}},
+            {size: 20, distance: 100, requirePower:1, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}, showArea: 'end'}},
             {size: 28, distance: 30, text:'shuttle\n powered up'},
         ]
     },
     {
         id: 'l4',
+        area: 'end',
+        hidden: 1,
         coords: {x:3400,y:400},
-        coords: {x:2000,y:400},
+        coords: {x:1900,y:400},
         words: [
             {size: 14, distance: 300, text:'a round porthole'},
             {size: 28, distance: 100, text:'escape shuttle entrance', triggers: {'win': 1}},

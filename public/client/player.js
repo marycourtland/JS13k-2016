@@ -30,6 +30,15 @@ Player.prototype.checkWires = function() {
         if (p.name === self.name) return;
 
         var d = distance(p.coords, self.coords);
+        if (!self.hasWireTo(p)) {
+            if (d < Settings.wireNear) g.actions['player-meet'](p);
+        }
+        else {
+            if (d > Settings.wireFar) g.actions['player-snap'](p, true); // snap the wire
+        }
+return;
+
+        var d = distance(p.coords, self.coords);
         var hasWire = self.hasWireTo(p);
         var wire_id = getWireId(p.name, this.name);
 

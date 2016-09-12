@@ -189,8 +189,10 @@
 
         'wire-remove': function(data) {
             var wire_id = getWireId(data.player1, data.player2);
-            g.game.getPlayer(data.player1).removeWire(data.player2);
-            g.game.getPlayer(data.player2).removeWire(data.player1);
+            var p1 = g.game.getPlayer(data.player1);
+            var p2 = g.game.getPlayer(data.player2);
+            p1.removeWire(p2);
+            p2.removeWire(p1);
             g.views.removeWire(wire_id); 
         },
 
