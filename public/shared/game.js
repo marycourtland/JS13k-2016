@@ -64,12 +64,17 @@ Game.prototype.eachPlayer = function(callback) {
 }
 
 
+
 // MINES
 Game.prototype.getMine = function(index) {
     return this.mines[Math.min(index, this.mines.length - 1)]
 }
 
-
+// `crunch: just like eachPlayer; maybe a _.iterator  ?
+Game.prototype.eachMine = function(callback) {
+    var self = this;
+    self.mines.forEach(function(m) { callback.call(self, m); })
+}
 
 //TEMPORARY DEBUGGING - TODO delete
 Game.prototype.log = function(text) {

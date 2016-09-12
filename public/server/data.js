@@ -31,41 +31,6 @@ for (var i = 0; i < checkpoints.length; i++) {
     })
 }
 
-tests = [];
-tests.push({
-    id: 'nl0',
-    coords: xy(300, 50),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test power source', triggers: {
-            setPower: 1,
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-tests.push({
-    id: 'nl1',
-    coords: xy(200, 200),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test node', triggers: {
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-
-tests.push({
-    id: 'nl2',
-    coords: xy(450, 350),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test node', triggers: {
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-
-
 
 // Decoration templates
 var decorations = {
@@ -219,52 +184,15 @@ templates.debris = function (params) {
     }
 }
 
-// TESTING - nonlevelling mines
-tests = [];
-tests.push({
-    id: 'nl0',
-    coords: xy(300, 50),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test power source', triggers: {
-            setPower: 1,
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-tests.push({
-    id: 'nl1',
-    coords: xy(200, 200),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test node', triggers: {
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-
-tests.push({
-    id: 'nl2',
-    coords: xy(450, 350),
-    wirable: 1,
-    words: [
-        {size:10, distance: 30, text: 'test node', triggers: {
-            wire: {playerRadius: 50}
-        }}
-    ]
-})
-
 
 //var landmarks = [
 mineData = [
     {
         id: 'l0',
-        coords: {x:960,y:270},
         coords: {x:380,y:220},
         words: [
-            {size: 24, distance: 50, text:'entry to\nan abandoned\nspace station'},
-            //{size: 36, distance: 200, text:'one functioning port', pbatch:'ss', triggers: {'checkpoint': 1}},
-            {size: 36, distance: 20, text:'one functioning port\n[+][ ]', pbatch:'ss', triggers: {
+            {size: 24, distance: 70, text:'entry to\nan abandoned\nspace station', pbatch:'ss'},
+            {size: 24, distance: 70, text:'entry to\nan abandoned\nspace station\n[+][ ]', pbatch:'ss', triggers: {
               'checkpoint': 1,
               'showArea': 'spacestation',
               'hideArea': 'outside'
@@ -274,46 +202,57 @@ mineData = [
     },
     {
         id: 'l1',
-        coords: {x:2180,y:220},
-        coords: {x:800,y:220},
+        area: 'spacestation',
+        coords: {x:1000,y:220},
         wirable: 1,
         words: [
-            {size: 14, distance: 100, text:'a control panel'},
+            {size: 14, distance: 100, text:'$cover'},
             {size: 20, distance: 50, text:'master power control', triggers: {setPower: 1}},
             {size: 28, distance: 30, text:'master power on', triggers: {wire: {playerRadius: 50}}},
         ]
     },
     {
         id: 'l2',
-        coords: {x:2480,y:440},
-        coords: {x:1280,y:440},
+        area: 'spacestation',
+        coords: {x:1580,y:440},
         wirable: 1,
         words: [
-            {size: 14, distance: 300, text:'a control panel'},
+            {size: 14, distance: 300, text:'$cover'},
             {size: 20, distance: 100, requirePower: 1, text:'life support\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
-            {size: 28, distance: 30, text:'life support\n powered up'},
+            {size: 28, distance: 30, text:'life support\npowered up', triggers: {wire: {playerRadius: 50}}},
         ]
     },
     {
         id: 'l3',
-        coords: {x:2820,y:300},
-        coords: {x:1620,y:300},
+        area: 'spacestation',
+        coords: {x:1680,y:120},
         wirable: 1,
         words: [
-            {size: 14, distance: 300, text:'a control panel'},
+            {size: 14, distance: 300, text:'$cover'},
+            {size: 20, distance: 100, requirePower: 1, text:'propulsion\nsystem control', triggers: {'lifeSupportOn': 1, wire: {playerRadius: 50}}},
+            {size: 28, distance: 30, text:'propulsion system\npowered up', triggers: {wire: {playerRadius: 50}}},
+        ]
+    },
+    {
+        id: 'l3',
+        area: 'spacestation',
+        coords: {x:2320,y:350},
+        wirable: 1,
+        words: [
+            {size: 14, distance: 300, text:'$cover'},
             {size: 20, distance: 100, requirePower:1, text:'shuttle\nsystem control', triggers: {wire: {playerRadius: 50}, showArea: 'end'}},
-            {size: 28, distance: 30, text:'shuttle\n powered up'},
+            {size: 28, distance: 30, text:'shuttle\npowered up'},
         ]
     },
     {
         id: 'l4',
         area: 'end',
         hidden: 1,
-        coords: {x:3400,y:400},
-        coords: {x:1900,y:400},
+        coords: {x:2400,y:200},
         words: [
-            {size: 14, distance: 300, text:'a round porthole'},
-            {size: 28, distance: 100, text:'escape shuttle entrance', triggers: {'win': 1}},
+            {size: 14, distance: 300, text:'a cylindrical airlock'},
+            {size: 28, distance: 100, text:'escape shuttle entrance\n[ ][ ]', pbatch:'end'},
+            {size: 28, distance: 100, text:'escape shuttle entrance\n[+][ ]', pbatch:'end', triggers: {'win': 1}},
             {size: 72, distance: 30, text:'blasting away\nto safety'},
         ]
     }
@@ -321,6 +260,7 @@ mineData = [
 //mineData = mineData.concat(landmarks);
 
 // TEMPORARY: set the spaceship area to be everything at x > 1000 (i.e. past the spaceship entry)
+/*
 mineData.forEach(function(mine) {
   return;
     if (!!mine.area) return;
@@ -332,6 +272,29 @@ mineData.forEach(function(mine) {
         mine.hidden = 1;
     }
 })
+*/
+
+mineData.forEach(function(mine) { if (mine.area === 'spacestation') mine.hidden = 1; })
+
+// Random words
+var randomWords = {
+  cover: [
+    'control panel',
+    'tangled wires',
+    'exposed motherboard',
+    'cluttered console',
+    'messy crawlspace',
+    'prominent mainframe'
+  ],
+  power: [
+    'solar array',
+    'nuclear generator',
+    'fusion reactor',
+    'em drive',
+    'thermal recycler',
+  ]  
+}
+
 
 // Append a terminal word to each mine to make things clean
 mineData.forEach(function(mine) {
@@ -346,3 +309,5 @@ mineData.forEach(function(mine) {
     })
     mine.words.push(terminal);
 })
+
+

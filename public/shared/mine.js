@@ -16,7 +16,7 @@ Mine.prototype = {};
 
 Mine.prototype.updateFromData = function(data) {
     this.id = data.id;
-    this.words = data.words;
+    this.words = data.words.map(function(w) { return shallowCopy(w); });
     this.coords = data.coords;
     this.hidden = data.hidden || 0;
     this.area = data.area || '';
@@ -26,10 +26,15 @@ Mine.prototype.updateFromData = function(data) {
     this.wires = data.wires || [];
     this.wirable = data.wirable || 0;
     this.levelDownDistance = data.levelDownDistance || 0;
-    this.powered = 0;
+    this.powered = data.powered || 0;
 
     this.words.forEach(function(w) {
         w.glitchLevel = w.glitchLevel || 0;
+
+        if (!!randomWords)
+            for (var alias in randomWords) {
+                w.text = w.text.replace('$'+alias, choice(randomWords[alias]))
+            }
     })
 }
 
@@ -57,6 +62,16 @@ Mine.prototype.getWord = function(i) {
 
 Mine.prototype.canPlayerTrigger = function(player) {
     var w = this.getWord();
+
+    if (w.requirePower && !this.powered) {
+        // Only let the mine level up if it will end up being powered
+        var willBePowered = false;
+        player.forEachWire(function(player2) {
+            var mine2 = player2.getCloseMine();
+            if (mine2 && mine2.wirable && mine2.powered) willBePowered = true;
+        })
+        if (!willBePowered) return;
+    }
 
     // Did the player already trigger one of the words in the pbatch?
     // (Players can only do 1 word per pbatch.)

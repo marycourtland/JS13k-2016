@@ -77,7 +77,7 @@ Game.prototype.tick = function() {
 Game.prototype.win = function() {
     this.stage = game_stages.ending;
     this.emit('game-over', {
-        reason: 'You have found the shuttle!' 
+        reason: 'You have escaped!' 
     })
 }
 

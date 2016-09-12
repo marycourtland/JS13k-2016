@@ -139,6 +139,8 @@ window.$ = function(id) {
 // ======  client/index.js
 'use strict';
 
+window.randomWords = false; // blah
+
 (function () {
     window.g = window.g || {};
     g.me = null;
@@ -247,6 +249,7 @@ window.$ = function(id) {
             else {
                 // TODO: aggregate the listening for game updates
                 var newbie = new Player(data.data);
+                newbie.game = g.game;
                 g.game.players.push(newbie);
                 g.views.renderSidebar();
                 g.views.renderPlayer(newbie);
@@ -317,6 +320,7 @@ window.$ = function(id) {
             data.player.coords = p.coords;
 
             p.updateFromData(data.player);
+            p.game = g.game;
             g.views.updatePlayer(p);
         },
 
@@ -352,6 +356,7 @@ window.$ = function(id) {
         'die': function(data) {
             var player = g.game.getPlayer(data.name);
             player.updateFromData(data.player);
+            player.game = this.game;
             if (data.name === g.me.name) {
                 console.log('DEAD') 
             }

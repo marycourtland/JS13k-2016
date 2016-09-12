@@ -8,7 +8,7 @@ Player.prototype = {};
 Player.prototype.updateFromData = function(data) {
     this.name = data.name;
     this.id = data.name; // for player/mine interop
-    this.game = data.game;
+    this.game = this.game || data.game; // preserver populated game clientside
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
     this.coords = data.coords || xy(40, 40);
@@ -56,6 +56,9 @@ Player.prototype.hasWireTo = function(player2) {
 // and executes callback for each of those players
 Player.prototype.forEachWire = function(callback) {
     var self = this;
+    var _game = self.game;
+    if (typeof _game !== 'object' && !!g) _game = g.game; // ARGH
+
     self.wires.forEach(function(name) {
         var player2 = self.game.getPlayer(name);
 
@@ -66,6 +69,11 @@ Player.prototype.forEachWire = function(callback) {
     })
 }
 
-Player.prototype.lastTriggeredMine = function(callback) {
-    return this.game.getMineById(this._lastTriggeredMine);
+Player.prototype.getCloseMine = function(callback) {
+    var coords = this.coords;
+    var closeMine = null;
+    this.game.eachMine(function(mine) {
+        if (distance(mine.coords, coords) < Settings.playerWireRadius) closeMine = mine;
+    })
+    return closeMine;
 }

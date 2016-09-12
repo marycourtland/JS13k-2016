@@ -21,3 +21,15 @@ _.mapProp = function(objArray, property) {
 function getWireId(s1, s2) {
     return 'wire_' + [s1, s2].sort().join('_');
 }
+
+function shallowCopy(obj) {
+    var newObj = {};
+    for (var prop in obj) {
+        newObj[prop] = obj[prop];
+    }
+    return newObj;
+}
+
+function choice(array) {
+    return array[Math.floor(Math.random() * array.length)]
+}

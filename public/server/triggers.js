@@ -54,12 +54,11 @@ Triggers['spawn'] = function(player, mine, spawnData) {
 Triggers['wire'] = function(player, mine, data) {
     // ASSUMPTION: mine.wirable = true
     player.forEachWire(function(player2) {
-        var mine2 = player2.lastTriggeredMine()
+        var mine2 = player2.getCloseMine();
         if (!mine2) return;
         if (!mine2.wirable) return;
         if (mine2.hasWireTo(mine)) return;
         if (mine.hasWireTo(mine2)) return;
-        if (distance(player2.coords, mine2.coords) > Settings.playerWireRadius) return;
         console.log(
             'NEW WIRE: ',
             player.name + '|' + mine.id,
@@ -94,7 +93,6 @@ Triggers['lifeSupportOn'] = function(player, mine) {
 
 Triggers['setPower'] = function(player, mine, powerLevel) {
     var newPower = (mine.powered === 0);
-    console.log('TRIGGERED SET POWER newPower=' + newPower);
     mine.powered = powerLevel;
     if (newPower) mine.propagatePower();
 }

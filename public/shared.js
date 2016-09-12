@@ -73,12 +73,17 @@ Game.prototype.eachPlayer = function(callback) {
 }
 
 
+
 // MINES
 Game.prototype.getMine = function(index) {
     return this.mines[Math.min(index, this.mines.length - 1)]
 }
 
-
+// `crunch: just like eachPlayer; maybe a _.iterator  ?
+Game.prototype.eachMine = function(callback) {
+    var self = this;
+    self.mines.forEach(function(m) { callback.call(self, m); })
+}
 
 //TEMPORARY DEBUGGING - TODO delete
 Game.prototype.log = function(text) {
@@ -183,7 +188,7 @@ Mine.prototype = {};
 
 Mine.prototype.updateFromData = function(data) {
     this.id = data.id;
-    this.words = data.words;
+    this.words = data.words.map(function(w) { return shallowCopy(w); });
     this.coords = data.coords;
     this.hidden = data.hidden || 0;
     this.area = data.area || '';
@@ -193,10 +198,15 @@ Mine.prototype.updateFromData = function(data) {
     this.wires = data.wires || [];
     this.wirable = data.wirable || 0;
     this.levelDownDistance = data.levelDownDistance || 0;
-    this.powered = 0;
+    this.powered = data.powered || 0;
 
     this.words.forEach(function(w) {
         w.glitchLevel = w.glitchLevel || 0;
+
+        if (!!randomWords)
+            for (var alias in randomWords) {
+                w.text = w.text.replace('$'+alias, choice(randomWords[alias]))
+            }
     })
 }
 
@@ -224,6 +234,16 @@ Mine.prototype.getWord = function(i) {
 
 Mine.prototype.canPlayerTrigger = function(player) {
     var w = this.getWord();
+
+    if (w.requirePower && !this.powered) {
+        // Only let the mine level up if it will end up being powered
+        var willBePowered = false;
+        player.forEachWire(function(player2) {
+            var mine2 = player2.getCloseMine();
+            if (mine2 && mine2.wirable && mine2.powered) willBePowered = true;
+        })
+        if (!willBePowered) return;
+    }
 
     // Did the player already trigger one of the words in the pbatch?
     // (Players can only do 1 word per pbatch.)
@@ -262,7 +282,7 @@ Player.prototype = {};
 Player.prototype.updateFromData = function(data) {
     this.name = data.name;
     this.id = data.name; // for player/mine interop
-    this.game = data.game;
+    this.game = this.game || data.game; // preserver populated game clientside
     this.checkpoint = data.checkpoint || xy(0,0);
     this.glitchLevel = data.glitchLevel || 0;
     this.coords = data.coords || xy(40, 40);
@@ -310,6 +330,9 @@ Player.prototype.hasWireTo = function(player2) {
 // and executes callback for each of those players
 Player.prototype.forEachWire = function(callback) {
     var self = this;
+    var _game = self.game;
+    if (typeof _game !== 'object' && !!g) _game = g.game; // ARGH
+
     self.wires.forEach(function(name) {
         var player2 = self.game.getPlayer(name);
 
@@ -320,8 +343,13 @@ Player.prototype.forEachWire = function(callback) {
     })
 }
 
-Player.prototype.lastTriggeredMine = function(callback) {
-    return this.game.getMineById(this._lastTriggeredMine);
+Player.prototype.getCloseMine = function(callback) {
+    var coords = this.coords;
+    var closeMine = null;
+    this.game.eachMine(function(mine) {
+        if (distance(mine.coords, coords) < Settings.playerWireRadius) closeMine = mine;
+    })
+    return closeMine;
 }
 // ======  shared/settings.js
 var Settings = {};
@@ -386,4 +414,16 @@ _.mapProp = function(objArray, property) {
 
 function getWireId(s1, s2) {
     return 'wire_' + [s1, s2].sort().join('_');
+}
+
+function shallowCopy(obj) {
+    var newObj = {};
+    for (var prop in obj) {
+        newObj[prop] = obj[prop];
+    }
+    return newObj;
+}
+
+function choice(array) {
+    return array[Math.floor(Math.random() * array.length)]
 }
