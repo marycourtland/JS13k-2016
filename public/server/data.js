@@ -233,7 +233,7 @@ mineData = [
         ]
     },
     {
-        id: 'l3',
+        id: 'l4',
         area: 'spacestation',
         coords: {x:2620,y:350},
         wirable: 1,
@@ -244,7 +244,7 @@ mineData = [
         ]
     },
     {
-        id: 'l4',
+        id: 'l5',
         area: 'end',
         hidden: 1,
         coords: {x:2700,y:200},
