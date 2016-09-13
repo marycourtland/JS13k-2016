@@ -87,7 +87,7 @@ g.views.updateMine = function(index, size) {
     if (!$mine) return;
     mine.hidden ? $mine.hide() : $mine.show();
     if (mine.hidden) return;
-    if (mine.wirable) $mine.addClass('wirable');
+    if (mine.wirable || (mine.lvl0border && mine.level === 0)) $mine.addClass('wirable');
 
 
     if (g.views.poweredMines[mine.id]) {
@@ -97,7 +97,6 @@ g.views.updateMine = function(index, size) {
         $mine.removeClass('powered');
     }
 
-    //console.log('MINE POWERED ?????', mine.id, !!mine.powered, !!g.views.poweredMines[mine.id], $mine.className)
 
     // TODO: this is getting calculated twice - don't do that
     var size = size || word.size;

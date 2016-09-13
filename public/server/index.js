@@ -40,8 +40,11 @@ module.exports = function (socket) {
 
     setupSocket(socket);
 
-    socket.bind("disconnect", function () {});
-    socket.bind("error", function(d1, d2) {console.log("error data:", d1, d2)})
+    socket.bind("disconnect", function () {
+        // todo: clean up game
+    });
+
+    socket.bind("error", function(data) {console.log("error data:", data)})
 
     socket.bind("new_game", function(data) {
         // expect: data.name

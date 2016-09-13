@@ -25,7 +25,7 @@ window.randomWords = false; // blah
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
             //if (mine.level === mine.words.length - 1) return; // TODO: Reintroduce this when mine data wonkiness is fixed. It prevents doublebounces etc.
-            console.log('Mine levelled up:', mine.getWord().text)
+            //console.log('Mine levelled up:', mine.getWord().text)
             mine.levelUp(g.me);
 
             if (!mine.getWord().singlePlayerOnly)
@@ -43,7 +43,7 @@ window.randomWords = false; // blah
             var mine = g.game.mines[i];
             if (!mine.canPlayerTrigger(g.me)) return;
 
-            console.log('Mine levelled down:', mine.getWord().text)
+            //console.log('Mine levelled down:', mine.getWord().text)
             mine.levelDown(g.me);
 
             if (!mine.getWord().singlePlayerOnly)
@@ -167,7 +167,7 @@ window.randomWords = false; // blah
             //console.log('     ' + JSON.stringify(V.round(player.coords, 2)));
             //console.log('     ' + JSON.stringify(V.round(correction, 2)));
             //console.log(['coords', data.coords.x, data.coords.y, '|', player.coords.x, player.coords.y].join('\t'))
-            console.log(['xyerror', offset.x, offset.y].join('\t') + '\n');
+            //console.log(['xyerror', offset.x, offset.y].join('\t') + '\n');
         },
 
         'player-update': function(data) {
@@ -180,7 +180,11 @@ window.randomWords = false; // blah
             // TODO: ......improvement needed.
             data.player.coords = p.coords;
 
+            var x0 = p.coords.x;
             p.updateFromData(data.player);
+
+            if (p.name === g.me.name) g.views.moveFrame(p.coords.x - x0);
+
             p.game = g.game;
             g.views.updatePlayer(p);
         },
@@ -211,16 +215,16 @@ window.randomWords = false; // blah
 
         'checkpoint': function(data) {
             g.me.checkpoint = data.coords;
-            console.log('CHECKPOINT:', data.coords);
+            //console.log('CHECKPOINT:', data.coords);
         },
 
         'die': function(data) {
             var player = g.game.getPlayer(data.name);
             player.updateFromData(data.player);
             player.game = this.game;
-            if (data.name === g.me.name) {
-                console.log('DEAD') 
-            }
+            //if (data.name === g.me.name) {
+            //    console.log('DEAD') 
+            //}
             g.views.updatePlayer(player);
         },
 

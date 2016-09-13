@@ -4,7 +4,7 @@ var Settings = {};
 Settings.tickTimeout = 1000; // ms
 Settings.oxygenDrain = 0.005; // player will die in 20 ticks
 Settings.glitchPerDeath = 1;
-Settings.playerWireRadius = 50; // if the player on the other side is closer than that, make a wire
+Settings.playerWireRadius = 75; // if the player on the other side is closer than that, make a wire
 
 
 // CLIENT SIDE ==============================
@@ -13,8 +13,8 @@ Settings.playerWireRadius = 50; // if the player on the other side is closer tha
 Settings.marginR = 0.4; // percent of the view
 Settings.marginL = 0.2;
 
-Settings.velocity = 5;
+Settings.velocity = 6;
 
 // wireNear and wireFar control when player wires form and break
 Settings.wireNear = 30; // pixels
-Settings.wireFar = 800; // pixels, as the crow flies 
+Settings.wireFar = 1000; // pixels, as the crow flies 

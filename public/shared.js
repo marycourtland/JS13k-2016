@@ -202,11 +202,6 @@ Mine.prototype.updateFromData = function(data) {
 
     this.words.forEach(function(w) {
         w.glitchLevel = w.glitchLevel || 0;
-
-        if (!!randomWords)
-            for (var alias in randomWords) {
-                w.text = w.text.replace('$'+alias, choice(randomWords[alias]))
-            }
     })
 }
 
@@ -358,7 +353,7 @@ var Settings = {};
 Settings.tickTimeout = 1000; // ms
 Settings.oxygenDrain = 0.005; // player will die in 20 ticks
 Settings.glitchPerDeath = 1;
-Settings.playerWireRadius = 50; // if the player on the other side is closer than that, make a wire
+Settings.playerWireRadius = 75; // if the player on the other side is closer than that, make a wire
 
 
 // CLIENT SIDE ==============================
@@ -367,23 +362,23 @@ Settings.playerWireRadius = 50; // if the player on the other side is closer tha
 Settings.marginR = 0.4; // percent of the view
 Settings.marginL = 0.2;
 
-Settings.velocity = 5;
+Settings.velocity = 6;
 
 // wireNear and wireFar control when player wires form and break
 Settings.wireNear = 30; // pixels
-Settings.wireFar = 800; // pixels, as the crow flies 
+Settings.wireFar = 1000; // pixels, as the crow flies 
 // ======  shared/socket.js
 function setupSocket(socket) {
     var _emit = socket.emit;
     socket.emit = function() {
-        console.log(socket.id + ' emit: ' + arguments[0])
+//        console.log(socket.id + ' emit: ' + arguments[0])
         _emit.apply(socket, arguments);
     }
 
     socket.bind = function(signal, callback) {
         callback = ensureFunction(callback);
         socket.on(signal, function() {
-            console.log(socket.id + ' > ' + signal);
+//            console.log(socket.id + ' > ' + signal);
             callback.apply(null, arguments);
         })
     }

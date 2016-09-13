@@ -23,9 +23,11 @@ Game.prototype.addPlayer = function(name, socket) {
 
 Game.prototype.populate = function() {
     var self = this;
-    mineData.forEach(function(m) {
+    var mines = generateMineData();
+    mines.forEach(function(m) {
         m.game = self;
         self.addMine(new Mine(m));
+        var mine = self.mines[self.mines.length - 1];
     })
 }
 

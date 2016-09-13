@@ -30,11 +30,6 @@ Mine.prototype.updateFromData = function(data) {
 
     this.words.forEach(function(w) {
         w.glitchLevel = w.glitchLevel || 0;
-
-        if (!!randomWords)
-            for (var alias in randomWords) {
-                w.text = w.text.replace('$'+alias, choice(randomWords[alias]))
-            }
     })
 }
 

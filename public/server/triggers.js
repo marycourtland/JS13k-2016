@@ -55,16 +55,9 @@ Triggers['wire'] = function(player, mine, data) {
     // ASSUMPTION: mine.wirable = true
     player.forEachWire(function(player2) {
         var mine2 = player2.getCloseMine();
-        if (!mine2) return;
-        if (!mine2.wirable) return;
+        if (!mine2 || !mine2.wirable) return;
         if (mine2.hasWireTo(mine)) return;
         if (mine.hasWireTo(mine2)) return;
-        console.log(
-            'NEW WIRE: ',
-            player.name + '|' + mine.id,
-            '..>>..',
-            player2.name + '|' + mine2.id
-        )
 
         // if the player is within a good distance of a wirable mine, then we're good to go!!
         mine.addWireTo(mine2);
